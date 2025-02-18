@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Movie Explorer</title>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>Movie Explorer</h1>
+        <form id="form">
+          <input
+            type="text"
+            id="search"
+            class="search"
+            placeholder="Search movies..."
+          />
+        </form>
+      </div>
+    </header>
+
+    <main id="main"></main>
+
+    <!-- Loader and Error Message -->
+    <div id="loader" class="loader hidden"></div>
+    <div id="error-message" class="error-message hidden"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
