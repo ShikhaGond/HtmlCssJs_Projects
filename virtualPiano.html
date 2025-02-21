@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Virtual Piano</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      user-select: none;
+    }
+
+    .container {
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+      text-align: center;
+    }
+
+    #piano {
+      position: relative;
+      width: 840px;
+      height: 240px;
+      background: #1a1a1a;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+
+    .key {
+      position: absolute;
+      border-radius: 0 0 5px 5px;
+      transition: background-color 0.1s;
+      cursor: pointer;
+    }
+
+    .white {
+      width: 40px;
+      height: 200px;
+      background: #fff;
+      border: 1px solid #ccc;
+      z-index: 1;
+    }
+
+    .black {
+      width: 30px;
+      height: 120px;
+      background: #000;
+      z-index: 2;
+      top: 0;
+    }
+
+    .white:active, .white.active {
+      background: #f0f0f0;
+      box-shadow: inset 0 2px 3px rgba(0,0,0,0.1);
+    }
+
+    .black:active, .black.active {
+      background: #222;
+      box-shadow: inset 0 2px 3px rgba(0,0,0,0.3);
+    }
+
+    .controls {
+      margin-top: 2rem;
+      text-align: center;
+      color: #fff;
+    }
+
+    .key-hint {
+      display: inline-block;
+      background: rgba(255,255,255,0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      margin: 0.5rem;
+    }
+
+    .octave-label {
+      position: absolute;
+      bottom: -25px;
+      color: #fff;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Virtual Piano</h1>
+    <div id="piano">
+    </div>
+    <div class="controls">
+      <div class="key-hint">Use your computer keyboard to play!</div>
+    </div>
+  </div>
+
+  <script>
+    const octaves = [3, 4, 5];
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const noteFrequencies = {};
+    
+    octaves.forEach(octave => {
+      notes.forEach(note => {
+        const noteWithOctave = `${note}${octave}`;
+        const baseFrequency = 440; // A4
+        const baseNoteIndex = notes.indexOf('A');
+        const octaveDiff = octave - 4;
+        const halfSteps = notes.indexOf(note) - baseNoteIndex + (octaveDiff * 12);
+        noteFrequencies[noteWithOctave] = baseFrequency * Math.pow(2, halfSteps / 12);
+      });
+    });
+
+    const piano = document.getElementById('piano');
+    let whiteKeyIndex = 0;
+
+    octaves.forEach(octave => {
+      notes.forEach((note, index) => {
+        const noteWithOctave = `${note}${octave}`;
+        const key = document.createElement('div');
+        const isBlack = note.includes('#');
+        
+        key.className = `key ${isBlack ? 'black' : 'white'}`;
+        key.setAttribute('data-note', noteWithOctave);
+        
+        if (!isBlack) {
+          key.style.left = `${whiteKeyIndex * 40}px`;
+          whiteKeyIndex++;
+        } else {
+          key.style.left = `${(whiteKeyIndex - 0.3) * 40 - 15}px`;
+        }
+
+        piano.appendChild(key);
+      });
+
+      const label = document.createElement('div');
+      label.className = 'octave-label';
+      label.textContent = `Octave ${octave}`;
+      label.style.left = `${(whiteKeyIndex - 7) * 40}px`;
+      piano.appendChild(label);
+    });
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let activeOscillators = {};
+
+    function playNote(note) {
+      if (activeOscillators[note]) return;
+
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.value = noteFrequencies[note];
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      
+      oscillator.start();
+      activeOscillators[note] = { oscillator, gainNode };
+
+      const key = document.querySelector(`[data-note="${note}"]`);
+      if (key) key.classList.add('active');
+    }
+
+    function stopNote(note) {
+      if (!activeOscillators[note]) return;
+
+      const { oscillator, gainNode } = activeOscillators[note];
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+      oscillator.stop(audioCtx.currentTime + 0.1);
+      delete activeOscillators[note];
+
+      const key = document.querySelector(`[data-note="${note}"]`);
+      if (key) key.classList.remove('active');
+    }
+
+    document.querySelectorAll('.key').forEach(key => {
+      key.addEventListener('mousedown', () => playNote(key.dataset.note));
+      key.addEventListener('mouseup', () => stopNote(key.dataset.note));
+      key.addEventListener('mouseleave', () => stopNote(key.dataset.note));
+    });
+
+    const keyMap = {
+      'z': 'C3', 's': 'C#3', 'x': 'D3', 'd': 'D#3', 'c': 'E3', 'v': 'F3',
+      'g': 'F#3', 'b': 'G3', 'h': 'G#3', 'n': 'A3', 'j': 'A#3', 'm': 'B3',
+      'q': 'C4', '2': 'C#4', 'w': 'D4', '3': 'D#4', 'e': 'E4', 'r': 'F4',
+      '5': 'F#4', 't': 'G4', '6': 'G#4', 'y': 'A4', '7': 'A#4', 'u': 'B4',
+      'i': 'C5', '9': 'C#5', 'o': 'D5', '0': 'D#5', 'p': 'E5', '[': 'F5',
+      '=': 'F#5', ']': 'G5', 'Backspace': 'G#5', '\\': 'A5'
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.repeat) return;
+      const note = keyMap[e.key];
+      if (note) playNote(note);
+    });
+
+    document.addEventListener('keyup', (e) => {
+      const note = keyMap[e.key];
+      if (note) stopNote(note);
+    });
+  </script>
+</body>
+</html>
