@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Explorer - Country Guide</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+        }
+        
+        h1 {
+            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+        }
+        
+        .search-container {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 1.5rem auto;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .search-box {
+            display: flex;
+        }
+        
+        #country-input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 1rem;
+        }
+        
+        #search-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        #search-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .country-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem auto;
+            max-width: 1000px;
+            box-shadow: var(--box-shadow);
+            display: none;
+        }
+        
+        .country-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .flag-container {
+            width: 200px;
+            margin-right: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .flag-container img {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .country-name {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .country-name h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        .basic-info {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+        
+        .info-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: var(--light-color);
+            padding: 1rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .info-card h3 {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+        }
+        
+        .section h3 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+        
+        .section p {
+            margin-bottom: 1rem;
+        }
+        
+        .festival-card, .heritage-card {
+            background-color: var(--light-color);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .festival-card h4, .heritage-card h4 {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: var(--accent-color);
+            text-align: center;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .country-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .flag-container {
+                width: 150px;
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+            
+            .info-card {
+                min-width: 100%;
+            }
+            
+            .search-container, .country-container {
+                margin: 1.5rem;
+                padding: 1rem;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>World Explorer</h1>
+        <p>Discover countries around the globe</p>
+    </header>
+    
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="country-input" placeholder="Enter country name..." autocomplete="off">
+            <button id="search-btn">Search</button>
+        </div>
+        <p class="error-message" id="error-msg">Country not found. Please try again.</p>
+    </div>
+    
+    <div class="loader" id="loader"></div>
+    
+    <div class="country-container" id="country-info">
+        <div class="country-header">
+            <div class="flag-container">
+                <img id="country-flag" src="" alt="Country Flag">
+            </div>
+            <div class="country-name">
+                <h2 id="country-name"></h2>
+                <p id="country-native-name"></p>
+            </div>
+        </div>
+        
+        <div class="basic-info">
+            <div class="info-card">
+                <h3>Capital</h3>
+                <p id="country-capital"></p>
+            </div>
+            <div class="info-card">
+                <h3>Region</h3>
+                <p id="country-region"></p>
+            </div>
+            <div class="info-card">
+                <h3>Languages</h3>
+                <p id="country-languages"></p>
+            </div>
+            <div class="info-card">
+                <h3>Currency</h3>
+                <p id="country-currency"></p>
+            </div>
+        </div>
+        
+        <div class="section" id="geography-section">
+            <h3>Geography</h3>
+            <p id="country-geography"></p>
+        </div>
+        
+        <div class="section" id="festivals-section">
+            <h3>Cultural Festivals</h3>
+            <div id="festivals-list"></div>
+        </div>
+        
+        <div class="section" id="heritage-section">
+            <h3>UNESCO World Heritage Sites</h3>
+            <div id="heritage-list"></div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 World Explorer | Country Guide</p>
+    </footer>
+
+    <script>
+        // Country database (simplified for demo purposes)
+        const countryDatabase = {
+            "usa": {
+                name: "United States of America",
+                nativeName: "United States of America",
+                capital: "Washington, D.C.",
+                region: "North America",
+                subregion: "Northern America",
+                languages: ["English"],
+                currencies: [{name: "United States Dollar", code: "USD", symbol: "$"}],
+                flag: "/api/placeholder/300/200",
+                geography: "The United States is the third-largest country in the world by land area, spanning 9.8 million square kilometers. It features diverse geography including mountains, plains, deserts, and coastlines along the Atlantic and Pacific Oceans. The country borders Canada to the north and Mexico to the south.",
+                festivals: [
+                    {name: "Independence Day", description: "Celebrated on July 4th to commemorate the Declaration of Independence with fireworks, parades, and barbecues."},
+                    {name: "Thanksgiving", description: "A harvest festival celebrated on the fourth Thursday of November, featuring family gatherings and traditional turkey dinners."},
+                    {name: "Mardi Gras", description: "A carnival celebration in New Orleans featuring parades, music, and colorful costumes."}
+                ],
+                heritages: [
+                    {name: "Grand Canyon National Park", type: "Natural", year: 1979, description: "A steep-sided canyon carved by the Colorado River in Arizona, known for its overwhelming size and colorful landscape."},
+                    {name: "Statue of Liberty", type: "Cultural", year: 1984, description: "A colossal neoclassical sculpture on Liberty Island in New York Harbor, a symbol of freedom and democracy."},
+                    {name: "Yellowstone National Park", type: "Natural", year: 1978, description: "The first national park in the U.S. and widely held to be the first national park in the world, known for its wildlife and geothermal features."}
+                ]
+            },
+            "india": {
+                name: "India",
+                nativeName: "भारत (Bhārat)",
+                capital: "New Delhi",
+                region: "Asia",
+                subregion: "Southern Asia",
+                languages: ["Hindi", "English", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", "Gujarati", "Kannada", "Odia", "Punjabi", "Malayalam", "Assamese"],
+                currencies: [{name: "Indian Rupee", code: "INR", symbol: "₹"}],
+                flag: "/api/placeholder/300/200",
+                geography: "India is the seventh-largest country by area, situated in South Asia. It is bounded by the Indian Ocean on the south, the Arabian Sea on the southwest, and the Bay of Bengal on the southeast. It shares land borders with Pakistan, China, Nepal, Bhutan, Bangladesh, and Myanmar. The country features diverse landscapes including the Himalayan mountain range, the Thar Desert, and fertile plains along the Ganges river.",
+                festivals: [
+                    {name: "Diwali", description: "The festival of lights celebrated by Hindus, Jains, and Sikhs, featuring the lighting of lamps and fireworks."},
+                    {name: "Holi", description: "A spring festival known as the 'festival of colors' where people throw colored powder and water at each other."},
+                    {name: "Durga Puja", description: "A major Hindu festival celebrating the goddess Durga, featuring elaborate pandals (temporary structures) and cultural performances."}
+                ],
+                heritages: [
+                    {name: "Taj Mahal", type: "Cultural", year: 1983, description: "An ivory-white marble mausoleum in Agra, built by Emperor Shah Jahan in memory of his wife Mumtaz Mahal."},
+                    {name: "Red Fort Complex", type: "Cultural", year: 2007, description: "A historic fort in Old Delhi that served as the main residence of the Mughal Emperors."},
+                    {name: "Khajuraho Group of Monuments", type: "Cultural", year: 1986, description: "A group of Hindu and Jain temples known for their nagara-style architectural symbolism and erotic sculptures."}
+                ]
+            },
+            "japan": {
+                name: "Japan",
+                nativeName: "日本 (Nihon/Nippon)",
+                capital: "Tokyo",
+                region: "Asia",
+                subregion: "Eastern Asia",
+                languages: ["Japanese"],
+                currencies: [{name: "Japanese Yen", code: "JPY", symbol: "¥"}],
+                flag: "/api/placeholder/300/200",
+                geography: "Japan is an island country in East Asia, located in the Pacific Ocean. It consists of four main islands (Honshu, Hokkaido, Kyushu, and Shikoku) and numerous smaller islands. The country is characterized by mountainous terrain, with Mount Fuji being its highest peak. Japan lies along the Pacific Ring of Fire, making it prone to earthquakes and volcanic activity.",
+                festivals: [
+                    {name: "Hanami", description: "Cherry blossom viewing festival celebrated in spring with picnics under blooming cherry trees."},
+                    {name: "Gion Matsuri", description: "One of Japan's most famous festivals held in Kyoto throughout July, featuring massive floats and traditional music."},
+                    {name: "Obon", description: "A Buddhist custom to honor the spirits of ancestors, featuring lantern lighting and the Bon dance."}
+                ],
+                heritages: [
+                    {name: "Historic Monuments of Ancient Kyoto", type: "Cultural", year: 1994, description: "Includes 17 temples, shrines and a castle that represent the development of Japanese wooden architecture."},
+                    {name: "Hiroshima Peace Memorial (Genbaku Dome)", type: "Cultural", year: 1996, description: "A memorial to those who were killed by the atomic bomb in 1945, serving as a symbol of peace."},
+                    {name: "Mount Fuji", type: "Cultural", year: 2013, description: "Japan's highest mountain and an iconic symbol of the country, inspiring artists and pilgrims for centuries."}
+                ]
+            },
+            "brazil": {
+                name: "Brazil",
+                nativeName: "Brasil",
+                capital: "Brasília",
+                region: "Americas",
+                subregion: "South America",
+                languages: ["Portuguese"],
+                currencies: [{name: "Brazilian Real", code: "BRL", symbol: "R$"}],
+                flag: "/api/placeholder/300/200",
+                geography: "Brazil is the largest country in South America and the fifth largest in the world by area. It borders all South American countries except Chile and Ecuador. The country encompasses a vast territory with diverse landscapes including the Amazon rainforest, the Pantanal wetlands, and an extensive coastline along the Atlantic Ocean. The Amazon River, the world's largest by volume, flows through the northern part of the country.",
+                festivals: [
+                    {name: "Carnival", description: "A vibrant celebration held before Lent, featuring samba dancing, colorful parades, and elaborate costumes."},
+                    {name: "Festa Junina", description: "A month-long celebration in June honoring rural life and saints, with traditional dancing, food, and decorations."},
+                    {name: "Círio de Nazaré", description: "One of the largest religious processions in the world, held in Belém to honor Our Lady of Nazareth."}
+                ],
+                heritages: [
+                    {name: "Historic Centre of Salvador de Bahia", type: "Cultural", year: 1985, description: "A well-preserved Renaissance urban setting adapted to colonial circumstances with colorful buildings."},
+                    {name: "Iguaçu National Park", type: "Natural", year: 1986, description: "Home to one of the world's largest and most impressive waterfalls, the Iguaçu Falls."},
+                    {name: "Central Amazon Conservation Complex", type: "Natural", year: 2000, description: "Protects a significant part of the Amazon rainforest, hosting extraordinary biodiversity."}
+                ]
+            },
+            "egypt": {
+                name: "Egypt",
+                nativeName: "مصر (Misr)",
+                capital: "Cairo",
+                region: "Africa",
+                subregion: "Northern Africa",
+                languages: ["Arabic"],
+                currencies: [{name: "Egyptian Pound", code: "EGP", symbol: "£"}],
+                flag: "/api/placeholder/300/200",
+                geography: "Egypt is located in northeastern Africa with a portion of territory extending into Asia through the Sinai Peninsula. The country is bisected by the fertile Nile Valley where most economic activity takes place. Beyond the Nile Valley lie vast desert areas that make up most of Egypt's territory. Egypt borders Libya to the west, Sudan to the south, and shares maritime borders with Greece, Cyprus, and Turkey.",
+                festivals: [
+                    {name: "Eid al-Fitr", description: "A religious holiday marking the end of Ramadan, celebrated with prayers, feasts, and family gatherings."},
+                    {name: "Sham El-Nessim", description: "An ancient spring festival celebrated by all Egyptians regardless of religion, involving picnics and traditional foods."},
+                    {name: "Moulid of Abu al-Haggag", description: "A festival celebrated in Luxor, featuring a carnival-like atmosphere with processions and Sufi ceremonies."}
+                ],
+                heritages: [
+                    {name: "Pyramids of Giza", type: "Cultural", year: 1979, description: "Ancient Egyptian pyramid complexes including the Great Pyramid, one of the Seven Wonders of the Ancient World."},
+                    {name: "Ancient Thebes with its Necropolis", type: "Cultural", year: 1979, description: "Includes monuments like Luxor Temple, Karnak, the Valley of the Kings, and the Valley of the Queens."},
+                    {name: "Abu Simbel Temples", type: "Cultural", year: 1979, description: "Two massive rock temples in southern Egypt that were relocated in the 1960s to avoid flooding from the Aswan Dam."}
+                ]
+            },
+            "australia": {
+                name: "Australia",
+                nativeName: "Australia",
+                capital: "Canberra",
+                region: "Oceania",
+                subregion: "Australia and New Zealand",
+                languages: ["English"],
+                currencies: [{name: "Australian Dollar", code: "AUD", symbol: "$"}],
+                flag: "/api/placeholder/300/200",
+                geography: "Australia is the world's sixth-largest country by total area and the largest country in Oceania. It is surrounded by the Indian and Pacific Oceans and separated from Asia by the Arafura and Timor Seas. The country is known for its vast interior desert (the Outback), diverse landscapes including rainforests, mountain ranges, and the Great Barrier Reef along its northeastern coast.",
+                festivals: [
+                    {name: "Australia Day", description: "The official national day celebrated on January 26, commemorating the arrival of the First Fleet in 1788."},
+                    {name: "Sydney Festival", description: "A major summer festival featuring music, dance, circus, theater, and visual arts performances."},
+                    {name: "Vivid Sydney", description: "An annual festival of light, music, and ideas, transforming Sydney into an outdoor art gallery with light installations."}
+                ],
+                heritages: [
+                    {name: "Great Barrier Reef", type: "Natural", year: 1981, description: "The world's largest coral reef system, home to incredible marine biodiversity."},
+                    {name: "Sydney Opera House", type: "Cultural", year: 2007, description: "A masterpiece of 20th-century architecture and an iconic symbol of Australia."},
+                    {name: "Uluru-Kata Tjuta National Park", type: "Mixed", year: 1987, description: "Home to the sacred monolith Uluru (Ayers Rock) and the domed rocks of Kata Tjuta (The Olgas)."}
+                ]
+            }
+        };
+
+        // DOM Elements
+        const countryInput = document.getElementById('country-input');
+        const searchBtn = document.getElementById('search-btn');
+        const countryInfo = document.getElementById('country-info');
+        const errorMsg = document.getElementById('error-msg');
+        const loader = document.getElementById('loader');
+
+        // Country details elements
+        const countryFlag = document.getElementById('country-flag');
+        const countryName = document.getElementById('country-name');
+        const countryNativeName = document.getElementById('country-native-name');
+        const countryCapital = document.getElementById('country-capital');
+        const countryRegion = document.getElementById('country-region');
+        const countryLanguages = document.getElementById('country-languages');
+        const countryCurrency = document.getElementById('country-currency');
+        const countryGeography = document.getElementById('country-geography');
+        const festivalsList = document.getElementById('festivals-list');
+        const heritageList = document.getElementById('heritage-list');
+
+        // Event listeners
+        searchBtn.addEventListener('click', searchCountry);
+        countryInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                searchCountry();
+            }
+        });
+
+        // Search function
+        function searchCountry() {
+            const countryName = countryInput.value.trim().toLowerCase();
+            
+            if (!countryName) {
+                showError("Please enter a country name");
+                return;
+            }
+            
+            showLoader();
+            hideError();
+            
+            // Simulate API call with timeout
+            setTimeout(() => {
+                const countryData = countryDatabase[countryName];
+                
+                if (countryData) {
+                    displayCountryData(countryData);
+                    hideLoader();
+                } else {
+                    showError("Country not found. Try 'usa', 'india', 'japan', 'brazil', 'egypt', or 'australia' for demo.");
+                    hideLoader();
+                    countryInfo.style.display = 'none';
+                }
+            }, 1000);
+        }
+
+        // Display country data
+        function displayCountryData(country) {
+            // Update flag and name
+            countryFlag.src = country.flag;
+            countryFlag.alt = `${country.name} Flag`;
+            countryName.textContent = country.name;
+            countryNativeName.textContent = `Native name: ${country.nativeName}`;
+            
+            // Update basic info
+            countryCapital.textContent = country.capital;
+            countryRegion.textContent = `${country.region}${country.subregion ? ' - ' + country.subregion : ''}`;
+            countryLanguages.textContent = country.languages.join(', ');
+            
+            // Format currency
+            const currencyFormat = country.currencies.map(cur => {
+                return `${cur.name} (${cur.symbol} ${cur.code})`;
+            }).join(', ');
+            countryCurrency.textContent = currencyFormat;
+            
+            // Geography
+            countryGeography.textContent = country.geography;
+            
+            // Festivals
+            festivalsList.innerHTML = '';
+            country.festivals.forEach(festival => {
+                const festivalCard = document.createElement('div');
+                festivalCard.className = 'festival-card';
+                festivalCard.innerHTML = `
+                    <h4>${festival.name}</h4>
+                    <p>${festival.description}</p>
+                `;
+                festivalsList.appendChild(festivalCard);
+            });
+            
+            // UNESCO Heritage sites
+            heritageList.innerHTML = '';
+            country.heritages.forEach(site => {
+                const heritageCard = document.createElement('div');
+                heritageCard.className = 'heritage-card';
+                heritageCard.innerHTML = `
+                    <h4>${site.name} (${site.year})</h4>
+                    <p><strong>Type:</strong> ${site.type}</p>
+                    <p>${site.description}</p>
+                `;
+                heritageList.appendChild(heritageCard);
+            });
+            
+            // Show the country container
+            countryInfo.style.display = 'block';
+        }
+
+        // Helper functions
+        function showLoader() {
+            loader.style.display = 'block';
+        }
+        
+        function hideLoader() {
+            loader.style.display = 'none';
+        }
+        
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+        }
+        
+        function hideError() {
+            errorMsg.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
