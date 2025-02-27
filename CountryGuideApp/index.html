@@ -190,6 +190,60 @@
             display: none;
         }
         
+        .country-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .region-title {
+            width: 100%;
+            text-align: center;
+            color: var(--primary-color);
+            margin: 1rem 0;
+            font-size: 1.5rem;
+        }
+        
+        .country-card {
+            width: 150px;
+            background-color: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .country-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .country-card img {
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .country-card-name {
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .browse-title {
+            text-align: center;
+            color: var(--primary-color);
+            margin: 2rem 0 1rem;
+            font-size: 1.8rem;
+        }
+        
         @media (max-width: 768px) {
             .country-header {
                 flex-direction: column;
@@ -209,6 +263,10 @@
             .search-container, .country-container {
                 margin: 1.5rem;
                 padding: 1rem;
+            }
+            
+            .country-card {
+                width: 120px;
             }
         }
         
@@ -283,12 +341,178 @@
         </div>
     </div>
     
+    <h2 class="browse-title">Browse Countries</h2>
+    
+    <div id="browse-countries" class="country-list">
+        <!-- European Countries section -->
+        <h3 class="region-title">Europe</h3>
+        <!-- European country cards will be added here by JavaScript -->
+    </div>
+    
     <footer>
         <p>&copy; 2025 World Explorer | Country Guide</p>
     </footer>
 
     <script>
-        // Country database (simplified for demo purposes)
+        // European countries database
+        const europeanCountries = [
+            {
+                code: "germany",
+                name: "Germany",
+                flag: "https://flagcdn.com/w320/de.png"
+            },
+            {
+                code: "france",
+                name: "France",
+                flag: "https://flagcdn.com/w320/fr.png"
+            },
+            {
+                code: "uk",
+                name: "United Kingdom",
+                flag: "https://flagcdn.com/w320/gb.png"
+            },
+            {
+                code: "italy",
+                name: "Italy",
+                flag: "https://flagcdn.com/w320/it.png"
+            },
+            {
+                code: "spain",
+                name: "Spain",
+                flag: "https://flagcdn.com/w320/es.png"
+            },
+            {
+                code: "portugal",
+                name: "Portugal",
+                flag: "https://flagcdn.com/w320/pt.png"
+            },
+            {
+                code: "netherlands",
+                name: "Netherlands",
+                flag: "https://flagcdn.com/w320/nl.png"
+            },
+            {
+                code: "belgium",
+                name: "Belgium",
+                flag: "https://flagcdn.com/w320/be.png"
+            },
+            {
+                code: "sweden",
+                name: "Sweden",
+                flag: "https://flagcdn.com/w320/se.png"
+            },
+            {
+                code: "denmark",
+                name: "Denmark",
+                flag: "https://flagcdn.com/w320/dk.png"
+            },
+            {
+                code: "norway",
+                name: "Norway",
+                flag: "https://flagcdn.com/w320/no.png"
+            },
+            {
+                code: "finland",
+                name: "Finland",
+                flag: "https://flagcdn.com/w320/fi.png"
+            },
+            {
+                code: "ireland",
+                name: "Ireland",
+                flag: "https://flagcdn.com/w320/ie.png"
+            },
+            {
+                code: "austria",
+                name: "Austria",
+                flag: "https://flagcdn.com/w320/at.png"
+            },
+            {
+                code: "switzerland",
+                name: "Switzerland",
+                flag: "https://flagcdn.com/w320/ch.png"
+            },
+            {
+                code: "greece",
+                name: "Greece",
+                flag: "https://flagcdn.com/w320/gr.png"
+            },
+            {
+                code: "poland",
+                name: "Poland",
+                flag: "https://flagcdn.com/w320/pl.png"
+            },
+            {
+                code: "czech-republic",
+                name: "Czech Republic",
+                flag: "https://flagcdn.com/w320/cz.png"
+            },
+            {
+                code: "hungary",
+                name: "Hungary",
+                flag: "https://flagcdn.com/w320/hu.png"
+            },
+            {
+                code: "romania",
+                name: "Romania",
+                flag: "https://flagcdn.com/w320/ro.png"
+            }
+        ];
+
+        // Asian countries
+        const asianCountries = [
+            {
+                code: "japan",
+                name: "Japan",
+                flag: "https://flagcdn.com/w320/jp.png"
+            },
+            {
+                code: "china",
+                name: "China",
+                flag: "https://flagcdn.com/w320/cn.png"
+            },
+            {
+                code: "india",
+                name: "India",
+                flag: "https://flagcdn.com/w320/in.png"
+            },
+            {
+                code: "south-korea",
+                name: "South Korea",
+                flag: "https://flagcdn.com/w320/kr.png"
+            },
+            {
+                code: "thailand",
+                name: "Thailand",
+                flag: "https://flagcdn.com/w320/th.png"
+            },
+            {
+                code: "vietnam",
+                name: "Vietnam",
+                flag: "https://flagcdn.com/w320/vn.png"
+            },
+            {
+                code: "malaysia",
+                name: "Malaysia",
+                flag: "https://flagcdn.com/w320/my.png"
+            },
+            {
+                code: "indonesia",
+                name: "Indonesia",
+                flag: "https://flagcdn.com/w320/id.png"
+            },
+            {
+                code: "singapore",
+                name: "Singapore",
+                flag: "https://flagcdn.com/w320/sg.png"
+            },
+            {
+                code: "philippines",
+                name: "Philippines",
+                flag: "https://flagcdn.com/w320/ph.png"
+            }
+        ];
+
+        // Country database (expanded with European countries)
         const countryDatabase = {
             "usa": {
                 name: "United States of America",
@@ -298,7 +522,7 @@
                 subregion: "Northern America",
                 languages: ["English"],
                 currencies: [{name: "United States Dollar", code: "USD", symbol: "$"}],
-                flag: "/api/placeholder/300/200",
+                flag: "https://flagcdn.com/w320/us.png",
                 geography: "The United States is the third-largest country in the world by land area, spanning 9.8 million square kilometers. It features diverse geography including mountains, plains, deserts, and coastlines along the Atlantic and Pacific Oceans. The country borders Canada to the north and Mexico to the south.",
                 festivals: [
                     {name: "Independence Day", description: "Celebrated on July 4th to commemorate the Declaration of Independence with fireworks, parades, and barbecues."},
@@ -319,7 +543,7 @@
                 subregion: "Southern Asia",
                 languages: ["Hindi", "English", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", "Gujarati", "Kannada", "Odia", "Punjabi", "Malayalam", "Assamese"],
                 currencies: [{name: "Indian Rupee", code: "INR", symbol: "₹"}],
-                flag: "/api/placeholder/300/200",
+                flag: "https://flagcdn.com/w320/in.png",
                 geography: "India is the seventh-largest country by area, situated in South Asia. It is bounded by the Indian Ocean on the south, the Arabian Sea on the southwest, and the Bay of Bengal on the southeast. It shares land borders with Pakistan, China, Nepal, Bhutan, Bangladesh, and Myanmar. The country features diverse landscapes including the Himalayan mountain range, the Thar Desert, and fertile plains along the Ganges river.",
                 festivals: [
                     {name: "Diwali", description: "The festival of lights celebrated by Hindus, Jains, and Sikhs, featuring the lighting of lamps and fireworks."},
@@ -340,7 +564,7 @@
                 subregion: "Eastern Asia",
                 languages: ["Japanese"],
                 currencies: [{name: "Japanese Yen", code: "JPY", symbol: "¥"}],
-                flag: "/api/placeholder/300/200",
+                flag: "https://flagcdn.com/w320/jp.png",
                 geography: "Japan is an island country in East Asia, located in the Pacific Ocean. It consists of four main islands (Honshu, Hokkaido, Kyushu, and Shikoku) and numerous smaller islands. The country is characterized by mountainous terrain, with Mount Fuji being its highest peak. Japan lies along the Pacific Ring of Fire, making it prone to earthquakes and volcanic activity.",
                 festivals: [
                     {name: "Hanami", description: "Cherry blossom viewing festival celebrated in spring with picnics under blooming cherry trees."},
@@ -361,7 +585,7 @@
                 subregion: "South America",
                 languages: ["Portuguese"],
                 currencies: [{name: "Brazilian Real", code: "BRL", symbol: "R$"}],
-                flag: "/api/placeholder/300/200",
+                flag: "https://flagcdn.com/w320/br.png",
                 geography: "Brazil is the largest country in South America and the fifth largest in the world by area. It borders all South American countries except Chile and Ecuador. The country encompasses a vast territory with diverse landscapes including the Amazon rainforest, the Pantanal wetlands, and an extensive coastline along the Atlantic Ocean. The Amazon River, the world's largest by volume, flows through the northern part of the country.",
                 festivals: [
                     {name: "Carnival", description: "A vibrant celebration held before Lent, featuring samba dancing, colorful parades, and elaborate costumes."},
@@ -382,7 +606,7 @@
                 subregion: "Northern Africa",
                 languages: ["Arabic"],
                 currencies: [{name: "Egyptian Pound", code: "EGP", symbol: "£"}],
-                flag: "/api/placeholder/300/200",
+                flag: "https://flagcdn.com/w320/eg.png",
                 geography: "Egypt is located in northeastern Africa with a portion of territory extending into Asia through the Sinai Peninsula. The country is bisected by the fertile Nile Valley where most economic activity takes place. Beyond the Nile Valley lie vast desert areas that make up most of Egypt's territory. Egypt borders Libya to the west, Sudan to the south, and shares maritime borders with Greece, Cyprus, and Turkey.",
                 festivals: [
                     {name: "Eid al-Fitr", description: "A religious holiday marking the end of Ramadan, celebrated with prayers, feasts, and family gatherings."},
@@ -403,7 +627,7 @@
                 subregion: "Australia and New Zealand",
                 languages: ["English"],
                 currencies: [{name: "Australian Dollar", code: "AUD", symbol: "$"}],
-                flag: "/api/placeholder/300/200",
+                flag: "https://flagcdn.com/w320/au.png",
                 geography: "Australia is the world's sixth-largest country by total area and the largest country in Oceania. It is surrounded by the Indian and Pacific Oceans and separated from Asia by the Arafura and Timor Seas. The country is known for its vast interior desert (the Outback), diverse landscapes including rainforests, mountain ranges, and the Great Barrier Reef along its northeastern coast.",
                 festivals: [
                     {name: "Australia Day", description: "The official national day celebrated on January 26, commemorating the arrival of the First Fleet in 1788."},
@@ -415,131 +639,416 @@
                     {name: "Sydney Opera House", type: "Cultural", year: 2007, description: "A masterpiece of 20th-century architecture and an iconic symbol of Australia."},
                     {name: "Uluru-Kata Tjuta National Park", type: "Mixed", year: 1987, description: "Home to the sacred monolith Uluru (Ayers Rock) and the domed rocks of Kata Tjuta (The Olgas)."}
                 ]
+            },
+            // European countries
+            "germany": {
+                name: "Germany",
+                nativeName: "Deutschland",
+                capital: "Berlin",
+                region: "Europe",
+                subregion: "Western Europe",
+                languages: ["German"],
+                currencies: [{name: "Euro", code: "EUR", symbol: "€"}],
+                flag: "https://flagcdn.com/w320/de.png",
+                geography: "Germany is located in Central Europe, bordering the Baltic Sea and the North Sea, between the Netherlands and Poland, south of Denmark. The country features diverse landscapes including forests, mountains, and river valleys. The Alps are in the south, the uplands in central Germany, and the lowlands in the north.",
+                festivals: [
+                    {name: "Oktoberfest", description: "The world's largest beer festival, held annually in Munich with traditional Bavarian food, music, and beer."},
+                    {name: "Carnival", description: "A festive season occurring before Lent, particularly famous in Cologne, with street festivals, parades, and costumes."},
+                    {name: "Christmas Markets", description: "Traditional holiday markets held during Advent with food, drink, and seasonal items in a festive setting."}
+                ],
+                heritages: [
+                    {name: "Cologne Cathedral", type: "Cultural", year: 1996, description: "A Gothic masterpiece and one of the largest cathedrals in Europe, begun in 1248 and completed in 1880."},
+                    {name: "Museumsinsel (Museum Island)", type: "Cultural", year: 1999, description: "A complex of five internationally significant museums on an island in Berlin's Spree River."},
+                    {name: "Upper Middle Rhine Valley", type: "Cultural", year: 2002, description: "A 65km stretch of the Rhine River Valley, featuring castles, historic towns, and vineyards."}
+                ]
+            },
+            "france": {
+                name: "France",
+                nativeName: "France",
+                capital: "Paris",
+                region: "Europe",
+                subregion: "Western Europe",
+                languages: ["French"],
+                currencies: [{name: "Euro", code: "EUR", symbol: "€"}],
+                flag: "https://flagcdn.com/w320/fr.png",
+                geography: "France is located in Western Europe, bordering the Bay of Biscay and the English Channel, between Belgium and Spain, southeast of the UK. The country has varied terrain including flat plains, rolling hills, and mountainous regions (Alps, Pyrenees). It is the largest country in the European Union by area.",
+                festivals: [
+                    {name: "Bastille Day", description: "The national day of France celebrated on July 14th with fireworks, parades, and public festivities."},
+                    {name: "Cannes Film Festival", description: "One of the world's most prestigious film festivals, held annually in Cannes, showcasing new films from around the world."},
+                    {name: "Nice Carnival", description: "One of the world's major carnival events featuring parades, floats, and the traditional Battle of Flowers."}
+                ],
+                heritages: [
+                    {name: "Palace and Park of Versailles", type: "Cultural", year: 1979, description: "The principal royal residence of France from 1682 until the start of the French Revolution in 1789."},
+                    {name: "Mont-Saint-Michel and its Bay", type: "Cultural", year: 1979, description: "A tidal island and mainland commune, featuring a medieval monastery and village."},
+                    {name: "Paris, Banks of the Seine", type: "Cultural", year: 1991, description: "The Seine River and its banks in Paris, featuring numerous monuments including Notre-Dame, the Louvre, and the Eiffel Tower."}
+                ]
+            },
+            "uk": {
+                name: "United Kingdom",
+                nativeName: "United Kingdom",
+                capital: "London",
+                region: "Europe",
+                subregion: "Northern Europe",
+                languages: ["English"],
+                currencies: [{name: "Pound Sterling", code: "GBP", symbol: "£"}],
+                flag: "https://flagcdn.com/w320/gb.png",
+                geography: "The United Kingdom is an island nation in northwestern Europe consisting of Great Britain (England, Scotland, and Wales) and Northern Ireland. The UK features diverse landscapes, from the mountainous regions of Scotland and Wales to the rolling countryside of England. It is surrounded by the Atlantic Ocean, with the North Sea to the east, the English Channel to the south, and the Irish Sea to the west.",
+                festivals: [
+                    {name: "Notting Hill Carnival", description: "Europe's largest street festival celebrating Caribbean culture with music, dance, and colorful costumes."},
+                    {name: "Edinburgh Festival Fringe", description: "The world's largest arts festival featuring thousands of performances including comedy, theater, and music."},
+                    {name: "Glastonbury Festival", description: "One of the world's most famous music and performing arts festivals held in Somerset."}
+                ],
+                heritages: [
+                    {name: "Stonehenge", type: "Cultural", year: 1986, description: "A prehistoric monument consisting of a ring of standing stones, dating back to around 3000 BC."},
+                    {name: "Tower of London", type: "Cultural", year: 1988, description: "A historic castle founded in 1066, known for housing the Crown Jewels and its role as a prison."},
+                    {name: "Giant's Causeway", type: "Natural", year: 1986, description: "An area of about 40,000 interlocking basalt columns resulting from an ancient volcanic fissure eruption."}
+                ]
+            },
+            "italy": {
+                name: "Italy",
+                nativeName: "Italia",
+                capital: "Rome",
+                region: "Europe",
+                subregion: "Southern Europe",
+                languages: ["Italian"],
+                currencies: [{name: "Euro", code: "EUR", symbol: "€"}],
+                flag: "https://flagcdn.com/w320/it.png",
+                geography: "Italy is a boot-shaped peninsula extending into the central Mediterranean Sea. The country includes the islands of Sicily and Sardinia. Italy's landscape is diverse, featuring the Alps in the north, the Apennine Mountains running down the peninsula, and volcanic regions including Mount Vesuvius and Mount Etna.",
+                festivals: [
+                    {name: "Venice Carnival", description: "A renowned festival held in Venice, known for elaborate masks and costumes, dating back to the 12th century."},
+                    {name: "Palio di Siena", description: "A horse race held twice a year in Siena where ten horses and riders represent ten of the city's districts."},
+                    {name: "Festa di San Gennaro", description: "A religious celebration in Naples dedicated to Saint Januarius, the patron saint of the city."}
+                ],
+                heritages: [
+                    {name: "Historic Centre of Rome", type: "Cultural", year: 1980, description: "Includes monuments of antiquity like the Colosseum, Roman Forum, and Pantheon."},
+                    {name: "Venice and its Lagoon", type: "Cultural", year: 1987, description: "A unique cultural and architectural heritage with a lagoon city built on 118 small islands."},
+                    {name: "Historic Centre of Florence", type: "Cultural", year: 1982, description: "The birthplace of Renaissance art and architecture with masterpieces like the Duomo and Uffizi Gallery."}
+                ]
+            },
+            "spain": {
+                name: "Spain",
+                nativeName: "España",
+                capital: "Madrid",
+                region: "Europe",
+                subregion: "Southern Europe",
+                languages: ["Spanish"],
+                currencies: [{name: "Euro", code: "EUR", symbol: "€"}],
+                flag: "https://flagcdn.com/w320/es.png",
+                geography: "Spain occupies most of the Iberian Peninsula and includes the Balearic Islands in the Mediterranean and the Canary Islands in the Atlantic. The country features diverse landscapes, from the Pyrenees Mountains in the north to the beaches of the Costa del Sol. The Meseta Central, a vast plateau, dominates the interior.",
+                festivals: [
+                    {name: "La Tomatina", description: "A festival in Buñol where participants throw tomatoes at each other, creating a massive tomato fight."},
+                    {name: "Running of the Bulls", description: "Part of the San Fermín festival in Pamplona, where bulls run through the streets pursued by runners."},
+                    {name: "La Feria de Abril", description: "A spring fair in Seville featuring flamenco dancing, traditional costumes, and horse parades."}
+                ],
+                heritages: [
+                    {name: "Alhambra, Generalife and Albayzín", type: "Cultural", year: 1984, description: "A palace and fortress complex in Granada, representing Moorish and Andalusian architecture."},
+                    {name: "Works of Antoni Gaudí", type: "Cultural", year: 1984, description: "Seven properties in or near Barcelona designed by architect Antoni Gaudí, including Sagrada Família."},
+                    {name: "Historic City of Toledo", type: "Cultural", year: 1986, description: "A medieval city known for the coexistence of Christian, Islamic, and Jewish cultures."}
+                ]
             }
         };
 
+        // African countries
+        const africanCountries = [
+            {
+                code: "egypt",
+                name: "Egypt",
+                flag: "https://flagcdn.com/w320/eg.png"
+            },
+            {
+                code: "south-africa",
+                name: "South Africa",
+                flag: "https://flagcdn.com/w320/za.png"
+            },
+            {
+                code: "morocco",
+                name: "Morocco",
+                flag: "https://flagcdn.com/w320/ma.png"
+            },
+            {
+                code: "kenya",
+                name: "Kenya",
+                flag: "https://flagcdn.com/w320/ke.png"
+            },
+            {
+                code: "tanzania",
+                name: "Tanzania",
+                flag: "https://flagcdn.com/w320/tz.png"
+            },
+            {
+                code: "nigeria",
+                name: "Nigeria",
+                flag: "https://flagcdn.com/w320/ng.png"
+            },
+            {
+                code: "ethiopia",
+                name: "Ethiopia",
+                flag: "https://flagcdn.com/w320/et.png"
+            },
+            {
+                code: "ghana",
+                name: "Ghana",
+                flag: "https://flagcdn.com/w320/gh.png"
+            }
+        ];
+
+        // American countries
+        const americanCountries = [
+            {
+                code: "usa",
+                name: "United States",
+                flag: "https://flagcdn.com/w320/us.png"
+            },
+            {
+                code: "canada",
+                name: "Canada",
+                flag: "https://flagcdn.com/w320/ca.png"
+            },
+            {
+                code: "brazil",
+                name: "Brazil",
+                flag: "https://flagcdn.com/w320/br.png"
+            },
+            {
+                code: "mexico",
+                name: "Mexico",
+                flag: "https://flagcdn.com/w320/mx.png"
+            },
+            {
+                code: "argentina",
+                name: "Argentina",
+                flag: "https://flagcdn.com/w320/ar.png"
+            },
+            {
+                code: "colombia",
+                name: "Colombia",
+                flag: "https://flagcdn.com/w320/co.png"
+            },
+            {
+                code: "peru",
+                name: "Peru",
+                flag: "https://flagcdn.com/w320/pe.png"
+            },
+            {
+                code: "chile",
+                name: "Chile",
+                flag: "https://flagcdn.com/w320/cl.png"
+            }
+        ];
+
+        // Oceania countries
+        const oceaniaCountries = [
+            {
+                code: "australia",
+                name: "Australia",
+                flag: "https://flagcdn.com/w320/au.png"
+            },
+            {
+                code: "new-zealand",
+                name: "New Zealand",
+                flag: "https://flagcdn.com/w320/nz.png"
+            },
+            {
+                code: "fiji",
+                name: "Fiji",
+                flag: "https://flagcdn.com/w320/fj.png"
+            },
+            {
+                code: "papua-new-guinea",
+                name: "Papua New Guinea",
+                flag: "https://flagcdn.com/w320/pg.png"
+            }
+        ];
+
         // DOM Elements
         const countryInput = document.getElementById('country-input');
-        const searchBtn = document.getElementById('search-btn');
-        const countryInfo = document.getElementById('country-info');
-        const errorMsg = document.getElementById('error-msg');
+        const searchButton = document.getElementById('search-btn');
+        const errorMessage = document.getElementById('error-msg');
         const loader = document.getElementById('loader');
+        const countryInfo = document.getElementById('country-info');
+        const browseCountries = document.getElementById('browse-countries');
 
-        // Country details elements
-        const countryFlag = document.getElementById('country-flag');
-        const countryName = document.getElementById('country-name');
-        const countryNativeName = document.getElementById('country-native-name');
-        const countryCapital = document.getElementById('country-capital');
-        const countryRegion = document.getElementById('country-region');
-        const countryLanguages = document.getElementById('country-languages');
-        const countryCurrency = document.getElementById('country-currency');
-        const countryGeography = document.getElementById('country-geography');
-        const festivalsList = document.getElementById('festivals-list');
-        const heritageList = document.getElementById('heritage-list');
-
+        // Display country info
+        function displayCountryInfo(countryCode) {
+            // Reset previous data
+            errorMessage.style.display = 'none';
+            countryInfo.style.display = 'none';
+            loader.style.display = 'block';
+            
+            // Get country data (simulating API call)
+            setTimeout(() => {
+                const country = countryDatabase[countryCode];
+                
+                if (country) {
+                    // Set basic info
+                    document.getElementById('country-flag').src = country.flag;
+                    document.getElementById('country-name').textContent = country.name;
+                    document.getElementById('country-native-name').textContent = `Native name: ${country.nativeName}`;
+                    document.getElementById('country-capital').textContent = country.capital;
+                    document.getElementById('country-region').textContent = `${country.region} (${country.subregion})`;
+                    document.getElementById('country-languages').textContent = country.languages.join(', ');
+                    
+                    // Set currency info
+                    const currencyInfo = country.currencies.map(currency => 
+                        `${currency.name} (${currency.symbol})`
+                    ).join(', ');
+                    document.getElementById('country-currency').textContent = currencyInfo;
+                    
+                    // Set geography
+                    document.getElementById('country-geography').textContent = country.geography;
+                    
+                    // Set festivals
+                    const festivalsContainer = document.getElementById('festivals-list');
+                    festivalsContainer.innerHTML = '';
+                    country.festivals.forEach(festival => {
+                        const festivalCard = document.createElement('div');
+                        festivalCard.className = 'festival-card';
+                        festivalCard.innerHTML = `
+                            <h4>${festival.name}</h4>
+                            <p>${festival.description}</p>
+                        `;
+                        festivalsContainer.appendChild(festivalCard);
+                    });
+                    
+                    // Set heritage sites
+                    const heritageContainer = document.getElementById('heritage-list');
+                    heritageContainer.innerHTML = '';
+                    country.heritages.forEach(heritage => {
+                        const heritageCard = document.createElement('div');
+                        heritageCard.className = 'heritage-card';
+                        heritageCard.innerHTML = `
+                            <h4>${heritage.name} (${heritage.year})</h4>
+                            <p><strong>Type:</strong> ${heritage.type}</p>
+                            <p>${heritage.description}</p>
+                        `;
+                        heritageContainer.appendChild(heritageCard);
+                    });
+                    
+                    // Show country info
+                    loader.style.display = 'none';
+                    countryInfo.style.display = 'block';
+                    
+                    // Scroll to country info
+                    countryInfo.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    // Show error message
+                    loader.style.display = 'none';
+                    errorMessage.style.display = 'block';
+                }
+            }, 800); // Simulate loading delay
+        }
+        
+        // Create country card
+        function createCountryCard(country) {
+            const card = document.createElement('div');
+            card.className = 'country-card';
+            card.innerHTML = `
+                <img src="${country.flag}" alt="${country.name} flag">
+                <div class="country-card-name">${country.name}</div>
+            `;
+            card.addEventListener('click', () => {
+                displayCountryInfo(country.code);
+                countryInput.value = country.name;
+            });
+            return card;
+        }
+        
+        // Initialize browse section
+        function initializeBrowseSection() {
+            const container = document.getElementById('browse-countries');
+            
+            // Clear previous content
+            container.innerHTML = '';
+            
+            // Add Europe section
+            const europeTitle = document.createElement('h3');
+            europeTitle.className = 'region-title';
+            europeTitle.textContent = 'Europe';
+            container.appendChild(europeTitle);
+            
+            // Add European countries
+            europeanCountries.forEach(country => {
+                container.appendChild(createCountryCard(country));
+            });
+            
+            // Add Asia section
+            const asiaTitle = document.createElement('h3');
+            asiaTitle.className = 'region-title';
+            asiaTitle.textContent = 'Asia';
+            container.appendChild(asiaTitle);
+            
+            // Add Asian countries
+            asianCountries.forEach(country => {
+                container.appendChild(createCountryCard(country));
+            });
+            
+            // Add Americas section
+            const americasTitle = document.createElement('h3');
+            americasTitle.className = 'region-title';
+            americasTitle.textContent = 'Americas';
+            container.appendChild(americasTitle);
+            
+            // Add American countries
+            americanCountries.forEach(country => {
+                container.appendChild(createCountryCard(country));
+            });
+            
+            // Add Africa section
+            const africaTitle = document.createElement('h3');
+            africaTitle.className = 'region-title';
+            africaTitle.textContent = 'Africa';
+            container.appendChild(africaTitle);
+            
+            // Add African countries
+            africanCountries.forEach(country => {
+                container.appendChild(createCountryCard(country));
+            });
+            
+            // Add Oceania section
+            const oceaniaTitle = document.createElement('h3');
+            oceaniaTitle.className = 'region-title';
+            oceaniaTitle.textContent = 'Oceania';
+            container.appendChild(oceaniaTitle);
+            
+            // Add Oceania countries
+            oceaniaCountries.forEach(country => {
+                container.appendChild(createCountryCard(country));
+            });
+        }
+        
+        // Search functionality
+        function searchCountry() {
+            const searchTerm = countryInput.value.trim().toLowerCase();
+            
+            if (searchTerm === '') return;
+            
+            // Find country by name
+            const foundCountry = Object.keys(countryDatabase).find(key => {
+                const country = countryDatabase[key];
+                return country.name.toLowerCase().includes(searchTerm);
+            });
+            
+            if (foundCountry) {
+                displayCountryInfo(foundCountry);
+            } else {
+                errorMessage.style.display = 'block';
+                countryInfo.style.display = 'none';
+            }
+        }
+        
         // Event listeners
-        searchBtn.addEventListener('click', searchCountry);
-        countryInput.addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
+        searchButton.addEventListener('click', searchCountry);
+        countryInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
                 searchCountry();
             }
         });
-
-        // Search function
-        function searchCountry() {
-            const countryName = countryInput.value.trim().toLowerCase();
-            
-            if (!countryName) {
-                showError("Please enter a country name");
-                return;
-            }
-            
-            showLoader();
-            hideError();
-            
-            // Simulate API call with timeout
-            setTimeout(() => {
-                const countryData = countryDatabase[countryName];
-                
-                if (countryData) {
-                    displayCountryData(countryData);
-                    hideLoader();
-                } else {
-                    showError("Country not found. Try 'usa', 'india', 'japan', 'brazil', 'egypt', or 'australia' for demo.");
-                    hideLoader();
-                    countryInfo.style.display = 'none';
-                }
-            }, 1000);
-        }
-
-        // Display country data
-        function displayCountryData(country) {
-            // Update flag and name
-            countryFlag.src = country.flag;
-            countryFlag.alt = `${country.name} Flag`;
-            countryName.textContent = country.name;
-            countryNativeName.textContent = `Native name: ${country.nativeName}`;
-            
-            // Update basic info
-            countryCapital.textContent = country.capital;
-            countryRegion.textContent = `${country.region}${country.subregion ? ' - ' + country.subregion : ''}`;
-            countryLanguages.textContent = country.languages.join(', ');
-            
-            // Format currency
-            const currencyFormat = country.currencies.map(cur => {
-                return `${cur.name} (${cur.symbol} ${cur.code})`;
-            }).join(', ');
-            countryCurrency.textContent = currencyFormat;
-            
-            // Geography
-            countryGeography.textContent = country.geography;
-            
-            // Festivals
-            festivalsList.innerHTML = '';
-            country.festivals.forEach(festival => {
-                const festivalCard = document.createElement('div');
-                festivalCard.className = 'festival-card';
-                festivalCard.innerHTML = `
-                    <h4>${festival.name}</h4>
-                    <p>${festival.description}</p>
-                `;
-                festivalsList.appendChild(festivalCard);
-            });
-            
-            // UNESCO Heritage sites
-            heritageList.innerHTML = '';
-            country.heritages.forEach(site => {
-                const heritageCard = document.createElement('div');
-                heritageCard.className = 'heritage-card';
-                heritageCard.innerHTML = `
-                    <h4>${site.name} (${site.year})</h4>
-                    <p><strong>Type:</strong> ${site.type}</p>
-                    <p>${site.description}</p>
-                `;
-                heritageList.appendChild(heritageCard);
-            });
-            
-            // Show the country container
-            countryInfo.style.display = 'block';
-        }
-
-        // Helper functions
-        function showLoader() {
-            loader.style.display = 'block';
-        }
         
-        function hideLoader() {
-            loader.style.display = 'none';
-        }
+        // Initialize the page
+        initializeBrowseSection();
         
-        function showError(message) {
-            errorMsg.textContent = message;
-            errorMsg.style.display = 'block';
-        }
-        
-        function hideError() {
-            errorMsg.style.display = 'none';
-        }
+        // Display featured country on load
+        displayCountryInfo('usa');
     </script>
 </body>
 </html>
