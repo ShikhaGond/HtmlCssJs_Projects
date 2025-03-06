@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Sound Board</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #444;
+            margin: 20px 0;
+            text-align: center;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+            width: 100%;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .sound-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .sound-btn {
+            padding: 15px 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+        }
+
+        .sound-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .sound-btn:active {
+            transform: scale(0.95);
+        }
+
+        .sound-btn i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .reaction .sound-btn {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .reaction .sound-btn:hover {
+            background-color: #ffcdd2;
+        }
+
+        .animals .sound-btn {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .animals .sound-btn:hover {
+            background-color: #c8e6c9;
+        }
+
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 100;
+            display: none;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .button-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Interactive Sound Board</h1>
+        <p>Click the buttons to play different sounds</p>
+    </header>
+
+    <div class="container">
+        <div class="sound-section reaction">
+            <h2>Reaction Sounds</h2>
+            <div class="button-grid">
+                <button class="sound-btn" data-sound="applause">
+                    <i class="fas fa-hands-clapping"></i>
+                    Applause
+                </button>
+                <button class="sound-btn" data-sound="boo">
+                    <i class="fas fa-thumbs-down"></i>
+                    Boo
+                </button>
+                <button class="sound-btn" data-sound="gasp">
+                    <i class="fas fa-face-surprise"></i>
+                    Shocked
+                </button>
+                <button class="sound-btn" data-sound="tada">
+                    <i class="fas fa-party-horn"></i>
+                    Ta-Da!
+                </button>
+                <button class="sound-btn" data-sound="cheer">
+                    <i class="fas fa-face-grin-stars"></i>
+                    Cheer
+                </button>
+                <button class="sound-btn" data-sound="laugh">
+                    <i class="fas fa-face-laugh-beam"></i>
+                    Laugh
+                </button>
+                <button class="sound-btn" data-sound="aww">
+                    <i class="fas fa-heart"></i>
+                    Aww
+                </button>
+                <button class="sound-btn" data-sound="whistle">
+                    <i class="fas fa-whistle"></i>
+                    Whistle
+                </button>
+            </div>
+        </div>
+
+        <div class="sound-section animals">
+            <h2>Animal Sounds</h2>
+            <div class="button-grid">
+                <button class="sound-btn" data-sound="dog">
+                    <i class="fas fa-dog"></i>
+                    Dog
+                </button>
+                <button class="sound-btn" data-sound="cat">
+                    <i class="fas fa-cat"></i>
+                    Cat
+                </button>
+                <button class="sound-btn" data-sound="cow">
+                    <i class="fas fa-cow"></i>
+                    Cow
+                </button>
+                <button class="sound-btn" data-sound="horse">
+                    <i class="fas fa-horse"></i>
+                    Horse
+                </button>
+                <button class="sound-btn" data-sound="lion">
+                    <i class="fas fa-paw"></i>
+                    Lion
+                </button>
+                <button class="sound-btn" data-sound="eagle">
+                    <i class="fas fa-crow"></i>
+                    Eagle
+                </button>
+                <button class="sound-btn" data-sound="monkey">
+                    <i class="fas fa-monkey"></i>
+                    Monkey
+                </button>
+                <button class="sound-btn" data-sound="elephant">
+                    <i class="fas fa-elephant"></i>
+                    Elephant
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-indicator" id="loading">Loading sounds...</div>
+
+    <footer>
+        <p>Created by SG</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+            
+            const soundData = {
+                
+                applause: 'https://soundbible.com/grab.php?id=1964&type=mp3', 
+                boo: 'https://soundbible.com/grab.php?id=1830&type=mp3', 
+                gasp: 'https://soundbible.com/grab.php?id=1629&type=mp3', 
+                tada: 'https://soundbible.com/grab.php?id=1823&type=mp3', 
+                cheer: 'https://soundbible.com/grab.php?id=1700&type=mp3', 
+                laugh: 'https://soundbible.com/grab.php?id=2102&type=mp3', 
+                aww: 'https://soundbible.com/grab.php?id=2103&type=mp3', 
+                whistle: 'https://soundbible.com/grab.php?id=1753&type=mp3', 
+                
+                dog: 'https://soundbible.com/grab.php?id=2033&type=mp3', 
+                cat: 'https://soundbible.com/grab.php?id=1954&type=mp3', 
+                cow: 'https://soundbible.com/grab.php?id=2168&type=mp3', 
+                horse: 'https://soundbible.com/grab.php?id=2127&type=mp3', 
+                lion: 'https://soundbible.com/grab.php?id=1483&type=mp3', 
+                eagle: 'https://soundbible.com/grab.php?id=602&type=mp3', 
+                monkey: 'https://soundbible.com/grab.php?id=1204&type=mp3', 
+                elephant: 'https://soundbible.com/grab.php?id=55&type=mp3' 
+            };
+
+            const audioElements = {};
+            let loadedCount = 0;
+            const totalSounds = Object.keys(soundData).length;
+            
+            for (const sound in soundData) {
+                audioElements[sound] = new Audio(soundData[sound]);
+                
+                audioElements[sound].addEventListener('canplaythrough', () => {
+                    loadedCount++;
+                    if (loadedCount === totalSounds) {
+                        loading.style.display = 'none';
+                    }
+                }, { once: true });
+                
+                audioElements[sound].addEventListener('error', () => {
+                    console.error(`Failed to load sound: ${sound}`);
+                    loadedCount++;
+                    if (loadedCount === totalSounds) {
+                        loading.style.display = 'none';
+                    }
+                });
+            }
+
+            const soundButtons = document.querySelectorAll('.sound-btn');
+            
+            soundButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const sound = button.getAttribute('data-sound');
+                    
+                    for (const audio in audioElements) {
+                        audioElements[audio].pause();
+                        audioElements[audio].currentTime = 0;
+                    }
+                    
+                    if (audioElements[sound]) {
+                        const playPromise = audioElements[sound].play();
+                        
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.error(`Error playing sound: ${error.message}`);
+                            });
+                        }
+                        
+                        button.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            button.style.transform = '';
+                        }, 200);
+                    }
+                });
+            });
+            
+            setTimeout(() => {
+                loading.style.display = 'none';
+            }, 10000);
+        });
+    </script>
+</body>
+</html>
