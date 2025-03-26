@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower of Hanoi</title>
+    <style>
+        :root {
+            --disk-height: 20px;
+            --tower-width: 28vw;
+            --max-tower-width: 200px;
+            --min-tower-width: 120px;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            margin: 20px 0;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+        }
+
+        .game-container {
+            display: flex;
+            justify-content: space-around;
+            width: 90%;
+            max-width: 800px;
+            margin: 20px 0;
+            position: relative;
+            gap: 2%;
+        }
+
+        .tower {
+            flex: 1;
+            max-width: var(--max-tower-width);
+            min-width: var(--min-tower-width);
+            height: 50vh;
+            max-height: 400px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            border-bottom: 10px solid #666;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .tower:hover {
+            border-bottom-color: #444;
+        }
+
+        .tower.selected {
+            border-bottom-color: #ff4444;
+        }
+
+        .disk {
+            height: var(--disk-height);
+            margin: 2px 0;
+            border-radius: 10px;
+            position: absolute;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .controls {
+            margin: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #status {
+            margin: 20px 0;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+                height: 60vh;
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .tower {
+                width: 60vw;
+                max-width: 200px;
+                height: 20vh;
+                min-height: 150px;
+                margin: 10px 0;
+            }
+
+            .disk {
+                height: calc(var(--disk-height) * 0.8);
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                --disk-height: 16px;
+            }
+
+            .tower {
+                width: 80vw;
+                min-height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Tower of Hanoi</h1>
+    <div class="game-container" id="gameContainer"></div>
+    <div class="controls">
+        <button onclick="resetGame()">Reset Game</button>
+    </div>
+    <div id="status">Moves: 0</div>
+
+    <script>
+        let towerCount = 3;
+        let diskCount = 5;
+        let towers = [];
+        let selectedTower = null;
+        let moveCount = 0;
+
+        function calculateDiskCount() {
+            const screenWidth = window.innerWidth;
+            diskCount = screenWidth < 480 ? 4 : 5;
+        }
+
+        function initializeGame() {
+            calculateDiskCount();
+            const container = document.getElementById('gameContainer');
+            container.innerHTML = '';
+            
+            towers = [
+                Array.from({length: diskCount}, (_, i) => diskCount - i),
+                [],
+                []
+            ];
+
+            for (let i = 0; i < towerCount; i++) {
+                const tower = document.createElement('div');
+                tower.className = 'tower';
+                tower.dataset.index = i;
+                tower.addEventListener('click', handleTowerClick);
+                container.appendChild(tower);
+            }
+
+            updateDisks();
+            updateStatus();
+        }
+
+        function createDisk(size) {
+            const disk = document.createElement('div');
+            disk.className = 'disk';
+            const maxWidth = window.innerWidth < 768 ? 70 : 85;
+            disk.style.width = `${(size * maxWidth) / diskCount}%`;
+            disk.style.backgroundColor = `hsl(${size * 40}, 70%, 50%)`;
+            disk.dataset.size = size;
+            return disk;
+        }
+
+        function updateDisks() {
+            const towerElements = document.getElementsByClassName('tower');
+            
+            towers.forEach((disks, towerIndex) => {
+                const tower = towerElements[towerIndex];
+                tower.innerHTML = '';
+                
+                disks.forEach((size, diskIndex) => {
+                    const disk = createDisk(size);
+                    disk.style.bottom = `${diskIndex * (window.innerWidth < 768 ? 20 : 25)}px`;
+                    tower.appendChild(disk);
+                });
+            });
+        }
+
+        function handleTowerClick(event) {
+            const towerIndex = parseInt(event.currentTarget.dataset.index);
+            
+            if (selectedTower === null) {
+                if (towers[towerIndex].length > 0) {
+                    selectedTower = towerIndex;
+                    event.currentTarget.classList.add('selected');
+                }
+            } else {
+                const sourceTower = towers[selectedTower];
+                const targetTower = towers[towerIndex];
+                
+                if (selectedTower === towerIndex) {
+                    event.currentTarget.classList.remove('selected');
+                    selectedTower = null;
+                    return;
+                }
+
+                if (isValidMove(sourceTower, targetTower)) {
+                    moveDisk(sourceTower, targetTower);
+                    moveCount++;
+                    updateStatus();
+                    checkWin();
+                }
+
+                document.querySelectorAll('.tower').forEach(tower => {
+                    tower.classList.remove('selected');
+                });
+                selectedTower = null;
+            }
+        }
+
+        function isValidMove(source, target) {
+            if (source.length === 0) return false;
+            if (target.length === 0) return true;
+            return source[source.length - 1] < target[target.length - 1];
+        }
+
+        function moveDisk(source, target) {
+            target.push(source.pop());
+            updateDisks();
+        }
+
+        function updateStatus() {
+            document.getElementById('status').textContent = `Moves: ${moveCount}`;
+        }
+
+        function checkWin() {
+            if (towers[2].length === diskCount) {
+                setTimeout(() => {
+                    alert(`Congratulations! You won in ${moveCount} moves!`);
+                    resetGame();
+                }, 100);
+            }
+        }
+
+        function resetGame() {
+            moveCount = 0;
+            initializeGame();
+        }
+
+        // Handle window resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                initializeGame();
+            }, 200);
+        });
+
+        initializeGame();
+    </script>
+</body>
+</html>
