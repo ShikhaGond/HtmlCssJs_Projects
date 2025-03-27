@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insect Catcher Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            background-color: #87CEEB;
+            position: relative;
+        }
+
+        .insect {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .insect:hover {
+            transform: scale(1.1);
+        }
+
+        #score {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #time {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #startScreen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="startScreen">
+        <h1>Insect Catcher</h1>
+        <p>Select an insect to catch:</p>
+        <button onclick="startGame('fly')">🐝 Fly</button>
+        <button onclick="startGame('spider')">🕷️ Spider</button>
+    </div>
+
+    <div id="gameContainer" style="display: none;">
+        <div id="score">Score: 0</div>
+        <div id="time">Time: 20</div>
+    </div>
+
+    <script>
+        let score = 0;
+        let timeLeft = 20;
+        let gameInterval;
+        let timerInterval;
+        let selectedInsect = '';
+
+        function startGame(insect) {
+            selectedInsect = insect;
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            
+            // creating insects
+            gameInterval = setInterval(createInsect, 1000);
+            
+            // Start timer
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function createInsect() {
+            const insect = document.createElement('div');
+            insect.className = 'insect';
+            insect.innerHTML = selectedInsect === 'fly' ? '🐝' : '🕷️';
+            
+            // Random position
+            const x = Math.random() * (window.innerWidth - 50);
+            const y = Math.random() * (window.innerHeight - 50);
+            insect.style.left = `${x}px`;
+            insect.style.top = `${y}px`;
+            
+            // Add click event
+            insect.addEventListener('click', catchInsect);
+            
+            document.getElementById('gameContainer').appendChild(insect);
+        }
+
+        function catchInsect(event) {
+            score++;
+            document.getElementById('score').textContent = `Score: ${score}`;
+            event.target.remove();
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            document.getElementById('time').textContent = `Time: ${timeLeft}`;
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            alert(`Game Over! Your score: ${score}`);
+            location.reload(); 
+        }
+    </script>
+</body>
+</html>
