@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Adventure Maze Game</title>
+    <style>
+        /* CSS Styles */
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: #9fe7ff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            font-size: 36px;
+            text-shadow: 2px 2px 0 #ffde59;
+            margin-bottom: 10px;
+        }
+
+        .game-container {
+            position: relative;
+            margin: 0 auto;
+            width: 500px;
+            height: 500px;
+            background-color: #ffde59;
+            border: 8px solid #ff6b6b;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .wall {
+            position: absolute;
+            background-color: #ff6b6b;
+            border-radius: 8px;
+        }
+
+        .player {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: #4dabf7;
+            border-radius: 50%;
+            border: 3px solid #3186c4;
+            z-index: 10;
+            transition: all 0.05s ease;
+            background-image: radial-gradient(circle at 10px 10px, #82c9ff, #4dabf7);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+
+        .player::after {
+            content: "";
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .player::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            left: 17px;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .goal {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #69db7c;
+            border-radius: 10px;
+            z-index: 5;
+            background-image: radial-gradient(circle at center, #a9fbb0, #69db7c);
+            border: 3px solid #38a747;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+
+        .goal::before {
+            content: "★";
+            color: #ffde59;
+            font-size: 24px;
+            line-height: 40px;
+            text-shadow: 0 0 5px #ff6b6b;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button {
+            background-color: #4dabf7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            box-shadow: 0 3px 0 #3186c4;
+            transition: all 0.1s;
+        }
+
+        button:hover {
+            background-color: #3186c4;
+            transform: translateY(1px);
+            box-shadow: 0 2px 0 #2367a1;
+        }
+
+        button:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .level-display {
+            margin-top: 10px;
+            font-size: 20px;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        .star {
+            position: absolute;
+            color: #ffde59;
+            animation: twinkle 1.5s infinite alternate;
+            text-shadow: 0 0 5px #ff6b6b;
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            width: 100px;
+            height: 60px;
+            opacity: 0.8;
+            animation: float 20s infinite linear;
+        }
+        
+        .cloud:before, .cloud:after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        .cloud:before {
+            width: 70px;
+            height: 70px;
+            top: -30px;
+            left: 15px;
+        }
+        
+        .cloud:after {
+            width: 60px;
+            height: 60px;
+            top: -20px;
+            right: 15px;
+        }
+        
+        @keyframes float {
+            0% { transform: translateX(-150px); }
+            100% { transform: translateX(800px); }
+        }
+        
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 5px solid #ff6b6b;
+            font-size: 24px;
+            color: #ff6b6b;
+            display: none;
+            z-index: 100;
+        }
+        
+        .show-message {
+            display: block;
+            animation: popIn 0.5s forwards;
+        }
+        
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            70% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Adventure Maze Game</h1>
+    <div class="game-container" id="game-container">
+        <div class="player" id="player"></div>
+        <div class="goal" id="goal"></div>
+        <div class="message" id="message">Great job! Level Complete!</div>
+    </div>
+    <div class="level-display">Level: <span id="level-number">1</span></div>
+    <div class="controls">
+        <button id="resetBtn">Reset Level</button>
+        <button id="instructionsBtn">How to Play</button>
+    </div>
+
+    <script>
+        // JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game elements
+            const gameContainer = document.getElementById('game-container');
+            const player = document.getElementById('player');
+            const goal = document.getElementById('goal');
+            const resetBtn = document.getElementById('resetBtn');
+            const instructionsBtn = document.getElementById('instructionsBtn');
+            const message = document.getElementById('message');
+            const levelDisplay = document.getElementById('level-number');
+            
+            // Game state
+            let playerX = 30;
+            let playerY = 30;
+            let currentLevel = 1;
+            let walls = [];
+            let keysPressed = {};
+            let gameRunning = true;
+            
+            // Add some decorations
+            addDecorations();
+            
+            // Initial setup
+            setupLevel(currentLevel);
+            
+            // Game loop
+            function gameLoop() {
+                if (!gameRunning) return;
+                
+                // Handle player movement
+                const speed = 3;
+                let newX = playerX;
+                let newY = playerY;
+                
+                if (keysPressed['ArrowUp'] || keysPressed['w']) {
+                    newY -= speed;
+                }
+                if (keysPressed['ArrowDown'] || keysPressed['s']) {
+                    newY += speed;
+                }
+                if (keysPressed['ArrowLeft'] || keysPressed['a']) {
+                    newX -= speed;
+                }
+                if (keysPressed['ArrowRight'] || keysPressed['d']) {
+                    newX += speed;
+                }
+                
+                // Check collision with walls
+                const playerSize = 30;
+                const playerBuffer = 3; // Buffer for more forgiving collisions
+                
+                // Check if new position is valid
+                if (!checkCollision(newX, newY, playerSize - playerBuffer)) {
+                    playerX = newX;
+                    playerY = newY;
+                }
+                
+                // Keep player in bounds
+                playerX = Math.max(0, Math.min(gameContainer.offsetWidth - playerSize, playerX));
+                playerY = Math.max(0, Math.min(gameContainer.offsetHeight - playerSize, playerY));
+                
+                // Update player position
+                player.style.left = playerX + 'px';
+                player.style.top = playerY + 'px';
+                
+                // Check if player reached the goal
+                const goalRect = goal.getBoundingClientRect();
+                const playerRect = player.getBoundingClientRect();
+                
+                if (
+                    playerRect.right > goalRect.left &&
+                    playerRect.left < goalRect.right &&
+                    playerRect.bottom > goalRect.top &&
+                    playerRect.top < goalRect.bottom
+                ) {
+                    levelComplete();
+                }
+                
+                requestAnimationFrame(gameLoop);
+            }
+            
+            // Check collision with walls
+            function checkCollision(x, y, size) {
+                for (const wall of walls) {
+                    const wallRect = wall.getBoundingClientRect();
+                    const gameRect = gameContainer.getBoundingClientRect();
+                    
+                    const wallLeft = wallRect.left - gameRect.left;
+                    const wallTop = wallRect.top - gameRect.top;
+                    const wallRight = wallLeft + wall.offsetWidth;
+                    const wallBottom = wallTop + wall.offsetHeight;
+                    
+                    if (
+                        x < wallRight &&
+                        x + size > wallLeft &&
+                        y < wallBottom &&
+                        y + size > wallTop
+                    ) {
+                        return true; // Collision detected
+                    }
+                }
+                return false;
+            }
+            
+            // Level definitions
+            function setupLevel(level) {
+                // Clear old walls
+                walls.forEach(wall => wall.remove());
+                walls = [];
+                
+                // Reset player position
+                playerX = 30;
+                playerY = 30;
+                player.style.left = playerX + 'px';
+                player.style.top = playerY + 'px';
+                
+                // Update level display
+                levelDisplay.textContent = level;
+                
+                switch(level) {
+                    case 1:
+                        // Simple level with few walls
+                        createWall(100, 0, 20, 300);
+                        createWall(200, 100, 200, 20);
+                        createWall(300, 200, 20, 200);
+                        createWall(100, 400, 200, 20);
+                        goal.style.left = '430px';
+                        goal.style.top = '430px';
+                        break;
+                    case 2:
+                        // More complex level
+                        createWall(0, 100, 350, 20);
+                        createWall(150, 200, 350, 20);
+                        createWall(0, 300, 350, 20);
+                        createWall(150, 400, 350, 20);
+                        goal.style.left = '430px';
+                        goal.style.top = '30px';
+                        break;
+                    case 3:
+                        // Even more complex
+                        createWall(100, 0, 20, 400);
+                        createWall(200, 100, 20, 400);
+                        createWall(300, 0, 20, 300);
+                        createWall(400, 100, 20, 400);
+                        createWall(300, 350, 100, 20);
+                        createWall(150, 250, 150, 20);
+                        createWall(0, 150, 80, 20);
+                        goal.style.left = '430px';
+                        goal.style.top = '430px';
+                        break;
+                    default:
+                        // Random maze for higher levels
+                        createRandomMaze();
+                        goal.style.left = '430px';
+                        goal.style.top = '430px';
+                }
+                
+                // Start the game
+                gameRunning = true;
+                requestAnimationFrame(gameLoop);
+            }
+            
+            // Create a wall element
+            function createWall(x, y, width, height) {
+                const wall = document.createElement('div');
+                wall.className = 'wall';
+                wall.style.left = x + 'px';
+                wall.style.top = y + 'px';
+                wall.style.width = width + 'px';
+                wall.style.height = height + 'px';
+                gameContainer.appendChild(wall);
+                walls.push(wall);
+                return wall;
+            }
+            
+            // Create random maze
+            function createRandomMaze() {
+                const numWalls = 12;
+                for (let i = 0; i < numWalls; i++) {
+                    const isHorizontal = Math.random() > 0.5;
+                    const width = isHorizontal ? 100 + Math.random() * 200 : 10 + Math.random() * 30;
+                    const height = isHorizontal ? 10 + Math.random() * 30 : 100 + Math.random() * 200;
+                    const x = Math.random() * (500 - width);
+                    const y = Math.random() * (500 - height);
+                    
+                    // Don't block starting position
+                    if (!(x < 80 && y < 80)) {
+                        createWall(x, y, width, height);
+                    }
+                    
+                    // Don't block goal
+                    if (!(x > 380 && y > 380)) {
+                        createWall(x, y, width, height);
+                    }
+                }
+            }
+            
+            // Level complete
+            function levelComplete() {
+                gameRunning = false;
+                
+                // Show completion message
+                message.innerText = currentLevel < 3 ? "Great job! Level Complete!" : "Amazing! You beat all the levels!";
+                message.classList.add('show-message');
+                
+                // Confetti effect (stars)
+                for (let i = 0; i < 20; i++) {
+                    createStar();
+                }
+                
+                // Move to next level after a delay
+                setTimeout(() => {
+                    message.classList.remove('show-message');
+                    if (currentLevel < 3) {
+                        currentLevel++;
+                        setupLevel(currentLevel);
+                    } else {
+                        // Player completed all levels, restart at a higher difficulty
+                        currentLevel = 4 + Math.floor((currentLevel - 3) / 3);
+                        setupLevel(currentLevel);
+                    }
+                }, 2000);
+            }
+            
+            // Create celebration star
+            function createStar() {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.textContent = '★';
+                star.style.fontSize = 10 + Math.random() * 30 + 'px';
+                star.style.left = Math.random() * 500 + 'px';
+                star.style.top = Math.random() * 500 + 'px';
+                star.style.animationDelay = Math.random() * 1.5 + 's';
+                gameContainer.appendChild(star);
+                
+                setTimeout(() => {
+                    star.remove();
+                }, 2000);
+            }
+            
+            // Add decorative elements
+            function addDecorations() {
+                // Add clouds
+                for (let i = 0; i < 3; i++) {
+                    const cloud = document.createElement('div');
+                    cloud.className = 'cloud';
+                    cloud.style.top = 50 + Math.random() * 100 + 'px';
+                    cloud.style.animationDuration = 15 + Math.random() * 10 + 's';
+                    cloud.style.animationDelay = -Math.random() * 15 + 's';
+                    cloud.style.opacity = 0.4 + Math.random() * 0.3;
+                    cloud.style.transform = 'scale(' + (0.4 + Math.random() * 0.7) + ')';
+                    document.body.appendChild(cloud);
+                }
+                
+                // Add stars
+                for (let i = 0; i < 15; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.textContent = '★';
+                    star.style.fontSize = 10 + Math.random() * 15 + 'px';
+                    star.style.position = 'fixed';
+                    star.style.left = Math.random() * window.innerWidth + 'px';
+                    star.style.top = Math.random() * (window.innerHeight / 2) + 'px';
+                    star.style.animationDelay = Math.random() * 1.5 + 's';
+                    document.body.appendChild(star);
+                }
+            }
+            
+            // Event listeners
+            window.addEventListener('keydown', function(e) {
+                keysPressed[e.key] = true;
+                
+                // Prevent scrolling with arrow keys
+                if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                    e.preventDefault();
+                }
+            });
+            
+            window.addEventListener('keyup', function(e) {
+                keysPressed[e.key] = false;
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                setupLevel(currentLevel);
+            });
+            
+            instructionsBtn.addEventListener('click', function() {
+                message.innerText = "Move with arrow keys or WASD to reach the green goal. Avoid hitting the walls!";
+                message.classList.add('show-message');
+                
+                setTimeout(() => {
+                    message.classList.remove('show-message');
+                }, 3000);
+            });
+            
+            // Mobile controls
+            let touchStartX = null;
+            let touchStartY = null;
+            
+            gameContainer.addEventListener('touchstart', function(e) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            });
+            
+            gameContainer.addEventListener('touchmove', function(e) {
+                if (!touchStartX || !touchStartY) return;
+                
+                const touchX = e.touches[0].clientX;
+                const touchY = e.touches[0].clientY;
+                
+                const diffX = touchX - touchStartX;
+                const diffY = touchY - touchStartY;
+                
+                // Reset keys
+                keysPressed['ArrowUp'] = false;
+                keysPressed['ArrowDown'] = false;
+                keysPressed['ArrowLeft'] = false;
+                keysPressed['ArrowRight'] = false;
+                
+                // Determine direction
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    // Horizontal movement
+                    if (diffX > 0) {
+                        keysPressed['ArrowRight'] = true;
+                    } else {
+                        keysPressed['ArrowLeft'] = true;
+                    }
+                } else {
+                    // Vertical movement
+                    if (diffY > 0) {
+                        keysPressed['ArrowDown'] = true;
+                    } else {
+                        keysPressed['ArrowUp'] = true;
+                    }
+                }
+                
+                e.preventDefault();
+            });
+            
+            gameContainer.addEventListener('touchend', function() {
+                touchStartX = null;
+                touchStartY = null;
+                keysPressed['ArrowUp'] = false;
+                keysPressed['ArrowDown'] = false;
+                keysPressed['ArrowLeft'] = false;
+                keysPressed['ArrowRight'] = false;
+            });
+            
+            // Start the game
+            requestAnimationFrame(gameLoop);
+        });
+    </script>
+</body>
+</html>
