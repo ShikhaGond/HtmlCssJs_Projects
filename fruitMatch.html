@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Match Adventure</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(to bottom, #87CEEB, #3CB371);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-container {
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 90vw;
+        }
+
+        h1 {
+            color: #FF6B6B;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #FFD166;
+            border-radius: 15px;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .score-container, .level-container, .moves-container, .goal-container {
+            padding: 5px 15px;
+            background-color: #FFFFFF;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            gap: 8px;
+            background-color: #F4F1DE;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            background-color: #FEFDCA;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 40px;
+            transition: transform 0.2s, opacity 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            user-select: none;
+        }
+
+        .cell:hover {
+            transform: scale(1.05);
+        }
+
+        .cell.selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #FFD700;
+        }
+
+        .cell.matching {
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        .cell.disappear {
+            transform: scale(0);
+            opacity: 0;
+        }
+
+        .btn {
+            background-color: #06D6A0;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #FF9A5A, #FF5E5B);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 80%;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            animation: popIn 0.5s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal h2 {
+            color: #FF6B6B;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .modal p {
+            font-size: 1.3em;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .star-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 40px;
+        }
+
+        .tutorial {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .tutorial-arrow {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            transform: rotate(45deg);
+            z-index: 4;
+        }
+
+        @media (max-width: 768px) {
+            .game-board {
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(8, 40px);
+                gap: 5px;
+            }
+
+            .cell {
+                width: 40px;
+                height: 40px;
+                font-size: 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .info-bar {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Fruit Match 3 Adventure</h1>
+        
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <div class="info-bar">
+            <div class="level-container">Level: <span id="level">1</span></div>
+            <div class="score-container">Score: <span id="score">0</span></div>
+            <div class="moves-container">Moves: <span id="moves">15</span></div>
+            <div class="goal-container">Goal: <span id="goal">100</span></div>
+        </div>
+        
+        <div class="game-board" id="game-board"></div>
+        
+        <button class="btn" id="reset-btn">Reset Level</button>
+    </div>
+    
+    <div class="modal" id="level-complete">
+        <div class="modal-content">
+            <h2>Level Complete!</h2>
+            <p>You've completed level <span id="completed-level">1</span>!</p>
+            <div class="star-container" id="stars">
+                ⭐⭐⭐
+            </div>
+            <p>Score: <span id="final-score">0</span></p>
+            <button class="btn" id="next-level">Next Level</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="game-over">
+        <div class="modal-content">
+            <h2>Game Over!</h2>
+            <p>You've run out of moves!</p>
+            <p>Score: <span id="game-over-score">0</span></p>
+            <button class="btn" id="try-again">Try Again</button>
+        </div>
+    </div>
+
+    <div class="tutorial" id="tutorial" style="display: none;">
+        <p>Swap adjacent fruits to match 3 or more of the same fruit!</p>
+    </div>
+    <div class="tutorial-arrow" id="tutorial-arrow" style="display: none;"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game configuration
+            const config = {
+                rows: 8,
+                cols: 8,
+                fruitTypes: ['🍎', '🍌', '🍊', '🍇', '🍉', '🍓', '🥝', '🍍'],
+                selected: null,
+                score: 0,
+                level: 1,
+                moves: 15,
+                goal: 100,
+                isAnimating: false,
+                gameBoard: [],
+                levels: [
+                    { goal: 100, moves: 15, fruits: ['🍎', '🍌', '🍊', '🍇', '🍉'] },
+                    { goal: 200, moves: 20, fruits: ['🍎', '🍌', '🍊', '🍇', '🍉', '🍓'] },
+                    { goal: 300, moves: 25, fruits: ['🍎', '🍌', '🍊', '🍇', '🍉', '🍓', '🥝'] },
+                    { goal: 400, moves: 25, fruits: ['🍎', '🍌', '🍊', '🍇', '🍉', '🍓', '🥝', '🍍'] },
+                    { goal: 500, moves: 20, fruits: ['🍎', '🍌', '🍊', '🍇', '🍉', '🍓', '🥝', '🍍'] },
+                ]
+            };
+
+            // DOM elements
+            const gameBoardEl = document.getElementById('game-board');
+            const scoreEl = document.getElementById('score');
+            const levelEl = document.getElementById('level');
+            const movesEl = document.getElementById('moves');
+            const goalEl = document.getElementById('goal');
+            const progressEl = document.getElementById('progress');
+            const resetBtn = document.getElementById('reset-btn');
+            const levelCompleteModal = document.getElementById('level-complete');
+            const gameOverModal = document.getElementById('game-over');
+            const nextLevelBtn = document.getElementById('next-level');
+            const tryAgainBtn = document.getElementById('try-again');
+            const completedLevelEl = document.getElementById('completed-level');
+            const finalScoreEl = document.getElementById('final-score');
+            const gameOverScoreEl = document.getElementById('game-over-score');
+            const starsEl = document.getElementById('stars');
+            const tutorialEl = document.getElementById('tutorial');
+            const tutorialArrowEl = document.getElementById('tutorial-arrow');
+
+            // Initialize the game
+            function initGame() {
+                updateLevelInfo();
+                createBoard();
+                fillBoard();
+                updateProgress();
+                
+                // Show tutorial on first level
+                if (config.level === 1) {
+                    setTimeout(showTutorial, 500);
+                }
+            }
+
+            // Update level information
+            function updateLevelInfo() {
+                const currentLevel = config.levels[config.level - 1];
+                config.goal = currentLevel.goal;
+                config.moves = currentLevel.moves;
+                config.fruitTypes = currentLevel.fruits;
+                
+                levelEl.textContent = config.level;
+                scoreEl.textContent = config.score;
+                movesEl.textContent = config.moves;
+                goalEl.textContent = config.goal;
+            }
+
+            // Create the game board
+            function createBoard() {
+                gameBoardEl.innerHTML = '';
+                config.gameBoard = [];
+                
+                for (let row = 0; row < config.rows; row++) {
+                    config.gameBoard[row] = [];
+                    for (let col = 0; col < config.cols; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        cell.addEventListener('click', handleCellClick);
+                        
+                        gameBoardEl.appendChild(cell);
+                        config.gameBoard[row][col] = {
+                            element: cell,
+                            fruit: null
+                        };
+                    }
+                }
+            }
+
+            // Fill the board with fruits
+            function fillBoard() {
+                for (let row = 0; row < config.rows; row++) {
+                    for (let col = 0; col < config.cols; col++) {
+                        const cell = config.gameBoard[row][col];
+                        let fruit;
+                        
+                        // Avoid creating pre-matched fruits
+                        do {
+                            fruit = getRandomFruit();
+                        } while (
+                            (row >= 2 && config.gameBoard[row-1][col].fruit === fruit && config.gameBoard[row-2][col].fruit === fruit) ||
+                            (col >= 2 && config.gameBoard[row][col-1].fruit === fruit && config.gameBoard[row][col-2].fruit === fruit)
+                        );
+                        
+                        cell.fruit = fruit;
+                        cell.element.textContent = fruit;
+                    }
+                }
+            }
+
+            // Get a random fruit from the available types
+            function getRandomFruit() {
+                const level = config.levels[config.level - 1];
+                return level.fruits[Math.floor(Math.random() * level.fruits.length)];
+            }
+
+            // Handle cell click
+            function handleCellClick(event) {
+                if (config.isAnimating) return;
+                
+                const cell = event.currentTarget;
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                
+                // First selection
+                if (!config.selected) {
+                    config.selected = { row, col };
+                    cell.classList.add('selected');
+                    return;
+                }
+                
+                // Second selection - check if adjacent
+                const selectedRow = config.selected.row;
+                const selectedCol = config.selected.col;
+                
+                if (isAdjacent(selectedRow, selectedCol, row, col)) {
+                    // Swap fruits
+                    swapFruits(selectedRow, selectedCol, row, col);
+                } else {
+                    // If not adjacent, make this the new selection
+                    config.gameBoard[selectedRow][selectedCol].element.classList.remove('selected');
+                    config.selected = { row, col };
+                    cell.classList.add('selected');
+                }
+            }
+
+            // Check if two cells are adjacent
+            function isAdjacent(row1, col1, row2, col2) {
+                return (
+                    (Math.abs(row1 - row2) === 1 && col1 === col2) ||
+                    (Math.abs(col1 - col2) === 1 && row1 === row2)
+                );
+            }
+
+            // Swap two fruits and check for matches
+            function swapFruits(row1, col1, row2, col2) {
+                const cell1 = config.gameBoard[row1][col1];
+                const cell2 = config.gameBoard[row2][col2];
+                
+                // Swap fruits
+                const tempFruit = cell1.fruit;
+                cell1.fruit = cell2.fruit;
+                cell2.fruit = tempFruit;
+                
+                // Update display
+                cell1.element.textContent = cell1.fruit;
+                cell2.element.textContent = cell2.fruit;
+                
+                // Remove selection
+                cell1.element.classList.remove('selected');
+                config.selected = null;
+                
+                // Check for matches
+                const matches = findMatches();
+                if (matches.length > 0) {
+                    // Decrement moves
+                    config.moves--;
+                    movesEl.textContent = config.moves;
+                    
+                    // Process matches
+                    processMatches(matches);
+                } else {
+                    // If no matches, swap back
+                    const tempFruit = cell1.fruit;
+                    cell1.fruit = cell2.fruit;
+                    cell2.fruit = tempFruit;
+                    
+                    cell1.element.textContent = cell1.fruit;
+                    cell2.element.textContent = cell2.fruit;
+                    
+                    // Shake animation for invalid move
+                    cell1.element.classList.add('invalid');
+                    cell2.element.classList.add('invalid');
+                    
+                    setTimeout(() => {
+                        cell1.element.classList.remove('invalid');
+                        cell2.element.classList.remove('invalid');
+                    }, 500);
+                }
+            }
+
+            // Find all matches on the board
+            function findMatches() {
+                const matches = [];
+                
+                // Check horizontal matches
+                for (let row = 0; row < config.rows; row++) {
+                    let count = 1;
+                    let fruit = config.gameBoard[row][0].fruit;
+                    
+                    for (let col = 1; col < config.cols; col++) {
+                        const currentFruit = config.gameBoard[row][col].fruit;
+                        
+                        if (currentFruit === fruit) {
+                            count++;
+                        } else {
+                            if (count >= 3) {
+                                matches.push({
+                                    type: fruit,
+                                    positions: Array.from({ length: count }, (_, i) => ({ row, col: col - i - 1 }))
+                                });
+                            }
+                            count = 1;
+                            fruit = currentFruit;
+                        }
+                    }
+                    
+                    // Check at the end of row
+                    if (count >= 3) {
+                        matches.push({
+                            type: fruit,
+                            positions: Array.from({ length: count }, (_, i) => ({ row, col: config.cols - i - 1 }))
+                        });
+                    }
+                }
+                
+                // Check vertical matches
+                for (let col = 0; col < config.cols; col++) {
+                    let count = 1;
+                    let fruit = config.gameBoard[0][col].fruit;
+                    
+                    for (let row = 1; row < config.rows; row++) {
+                        const currentFruit = config.gameBoard[row][col].fruit;
+                        
+                        if (currentFruit === fruit) {
+                            count++;
+                        } else {
+                            if (count >= 3) {
+                                matches.push({
+                                    type: fruit,
+                                    positions: Array.from({ length: count }, (_, i) => ({ row: row - i - 1, col }))
+                                });
+                            }
+                            count = 1;
+                            fruit = currentFruit;
+                        }
+                    }
+                    
+                    // Check at the end of column
+                    if (count >= 3) {
+                        matches.push({
+                            type: fruit,
+                            positions: Array.from({ length: count }, (_, i) => ({ row: config.rows - i - 1, col }))
+                        });
+                    }
+                }
+                
+                return matches;
+            }
+
+            // Process matches - remove fruits and update score
+            function processMatches(matches) {
+                config.isAnimating = true;
+                
+                // Highlight matches
+                matches.forEach(match => {
+                    match.positions.forEach(pos => {
+                        const cell = config.gameBoard[pos.row][pos.col].element;
+                        cell.classList.add('matching');
+                    });
+                });
+                
+                // Calculate score
+                let scoreToAdd = 0;
+                matches.forEach(match => {
+                    const matchLength = match.positions.length;
+                    scoreToAdd += matchLength * 10;
+                    
+                    // Bonus for matches larger than 3
+                    if (matchLength > 3) {
+                        scoreToAdd += (matchLength - 3) * 10;
+                    }
+                });
+                
+                config.score += scoreToAdd;
+                scoreEl.textContent = config.score;
+                
+                // Remove matched fruits
+                setTimeout(() => {
+                    matches.forEach(match => {
+                        match.positions.forEach(pos => {
+                            const cell = config.gameBoard[pos.row][pos.col];
+                            cell.element.classList.remove('matching');
+                            cell.element.classList.add('disappear');
+                            cell.fruit = null;
+                        });
+                    });
+                    
+                    setTimeout(() => {
+                        matches.forEach(match => {
+                            match.positions.forEach(pos => {
+                                config.gameBoard[pos.row][pos.col].element.classList.remove('disappear');
+                            });
+                        });
+                        
+                        // Drop fruits and fill empty spaces
+                        dropFruits().then(() => {
+                            // Check for new matches after dropping
+                            const newMatches = findMatches();
+                            if (newMatches.length > 0) {
+                                processMatches(newMatches);
+                            } else {
+                                config.isAnimating = false;
+                                
+                                // Check game status
+                                checkGameStatus();
+                            }
+                        });
+                    }, 300);
+                }, 500);
+            }
+
+            // Drop fruits to fill empty spaces
+            function dropFruits() {
+                return new Promise(resolve => {
+                    // Drop fruits in each column
+                    for (let col = 0; col < config.cols; col++) {
+                        let emptySpaces = 0;
+                        
+                        // Count empty spaces and move fruits down
+                        for (let row = config.rows - 1; row >= 0; row--) {
+                            const cell = config.gameBoard[row][col];
+                            
+                            if (cell.fruit === null) {
+                                emptySpaces++;
+                            } else if (emptySpaces > 0) {
+                                // Move fruit down
+                                const targetRow = row + emptySpaces;
+                                config.gameBoard[targetRow][col].fruit = cell.fruit;
+                                config.gameBoard[targetRow][col].element.textContent = cell.fruit;
+                                
+                                cell.fruit = null;
+                                cell.element.textContent = '';
+                            }
+                        }
+                        
+                        // Fill empty spaces at the top with new fruits
+                        for (let row = 0; row < emptySpaces; row++) {
+                            const newFruit = getRandomFruit();
+                            config.gameBoard[row][col].fruit = newFruit;
+                            config.gameBoard[row][col].element.textContent = newFruit;
+                        }
+                    }
+                    
+                    // Small delay for visual effect
+                    setTimeout(resolve, 300);
+                });
+            }
+
+            // Update progress bar
+            function updateProgress() {
+                const percentage = Math.min(100, (config.score / config.goal) * 100);
+                progressEl.style.width = `${percentage}%`;
+            }
+
+            // Check game status
+            function checkGameStatus() {
+                updateProgress();
+                
+                // Check if goal reached
+                if (config.score >= config.goal) {
+                    completedLevelEl.textContent = config.level;
+                    finalScoreEl.textContent = config.score;
+                    
+                    // Calculate stars
+                    const percentage = config.score / config.goal;
+                    let stars = '⭐';
+                    if (percentage >= 1.5) {
+                        stars = '⭐⭐⭐';
+                    } else if (percentage >= 1.2) {
+                        stars = '⭐⭐';
+                    }
+                    starsEl.textContent = stars;
+                    
+                    levelCompleteModal.style.display = 'flex';
+                } 
+                // Check if out of moves
+                else if (config.moves <= 0) {
+                    gameOverScoreEl.textContent = config.score;
+                    gameOverModal.style.display = 'flex';
+                }
+            }
+
+            // Show tutorial
+            function showTutorial() {
+                const centerRow = Math.floor(config.rows / 2);
+                const centerCol = Math.floor(config.cols / 2);
+                
+                const cellRect = config.gameBoard[centerRow][centerCol].element.getBoundingClientRect();
+                const boardRect = gameBoardEl.getBoundingClientRect();
+                
+                tutorialEl.style.display = 'block';
+                tutorialEl.style.top = `${cellRect.top - 100}px`;
+                tutorialEl.style.left = `${cellRect.left - 100}px`;
+                
+                tutorialArrowEl.style.display = 'block';
+                tutorialArrowEl.style.top = `${cellRect.top - 10}px`;
+                tutorialArrowEl.style.left = `${cellRect.left + 20}px`;
+                
+                setTimeout(() => {
+                    tutorialEl.style.display = 'none';
+                    tutorialArrowEl.style.display = 'none';
+                }, 5000);
+            }
+
+            // Reset current level
+            resetBtn.addEventListener('click', () => {
+                const currentScore = config.score;
+                initGame();
+                config.score = currentScore;
+                scoreEl.textContent = config.score;
+            });
+
+            // Proceed to next level
+            nextLevelBtn.addEventListener('click', () => {
+                config.level++;
+                if (config.level > config.levels.length) {
+                    config.level = 1;
+                }
+                initGame();
+                levelCompleteModal.style.display = 'none';
+            });
+
+            // Try again after game over
+            tryAgainBtn.addEventListener('click', () => {
+                config.score = 0;
+                initGame();
+                gameOverModal.style.display = 'none';
+            });
+
+            // Initialize game
+            initGame();
+        });
+    </script>
+</body>
+</html>
