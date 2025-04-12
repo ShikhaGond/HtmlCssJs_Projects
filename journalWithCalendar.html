@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal Calendar</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .app-container {
+            display: flex;
+            gap: 20px;
+            height: calc(100vh - 150px);
+        }
+        
+        .calendar-container {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            overflow: auto;
+        }
+        
+        .entry-container {
+            flex: 1.5;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #calendar {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        #calendar th {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        #calendar td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            height: 40px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        #calendar td:hover {
+            background-color: #f0f0f0;
+        }
+        
+        #calendar .today {
+            background-color: #e8f4fc;
+            font-weight: bold;
+        }
+        
+        #calendar .selected {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        #calendar .has-entry {
+            position: relative;
+        }
+
+        #calendar .has-entry::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        #calendar .mood-happy::after {
+            background-color: #2ecc71;
+        }
+
+        #calendar .mood-neutral::after {
+            background-color: #f39c12;
+        }
+
+        #calendar .mood-sad::after {
+            background-color: #e74c3c;
+        }
+        
+        .date-display {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        #editor-container {
+            flex: 1;
+            margin-bottom: 15px;
+        }
+        
+        #editor {
+            height: 100%;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .ql-toolbar {
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+        
+        .mood-selector {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mood-selector label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .mood-option {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .mood-option input {
+            margin-right: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            flex: 1;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-export {
+            background-color: #27ae60;
+        }
+
+        .btn-export:hover {
+            background-color: #219955;
+        }
+        
+        .month-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .month-navigation button {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #3498db;
+        }
+        
+        .month-year {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .calendar-container, .entry-container {
+                width: 100%;
+            }
+
+            #editor-container {
+                height: 300px;
+            }
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            background-color: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .pdf-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">JC</div>
+            <h1>Journal Calendar</h1>
+        </header>
+        
+        <div class="app-container">
+            <div class="calendar-container">
+                <div class="month-navigation">
+                    <button id="prev-month">&lt;</button>
+                    <div class="month-year" id="month-display"></div>
+                    <button id="next-month">&gt;</button>
+                </div>
+                <table id="calendar">
+                    <thead>
+                        <tr>
+                            <th>Sun</th>
+                            <th>Mon</th>
+                            <th>Tue</th>
+                            <th>Wed</th>
+                            <th>Thu</th>
+                            <th>Fri</th>
+                            <th>Sat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendar-body">
+                        <!-- Calendar will be generated here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="entry-container">
+                <div class="date-display" id="selected-date"></div>
+                
+                <div class="mood-selector">
+                    <label>Today's Mood:</label>
+                    <div class="mood-option">
+                        <input type="radio" id="mood-happy" name="mood" value="happy">
+                        <label for="mood-happy">😊 Happy</label>
+                    </div>
+                    <div class="mood-option">
+                        <input type="radio" id="mood-neutral" name="mood" value="neutral">
+                        <label for="mood-neutral">😐 Neutral</label>
+                    </div>
+                    <div class="mood-option">
+                        <input type="radio" id="mood-sad" name="mood" value="sad">
+                        <label for="mood-sad">😔 Sad</label>
+                    </div>
+                </div>
+                
+                <div id="editor-container">
+                    <div id="editor"></div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn" id="save-entry">Save Entry</button>
+                    <button class="btn btn-export" id="export-pdf">Export to PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pdf-content" class="pdf-container">
+        <!-- PDF content will be prepared here -->
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the rich text editor
+            const quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        [{ 'header': 1 }, { 'header': 2 }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'color': [] }, { 'background': [] }],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Write your journal entry for today...'
+            });
+
+            // Initialize variables
+            const calendarBody = document.getElementById('calendar-body');
+            const monthDisplay = document.getElementById('month-display');
+            const selectedDateDisplay = document.getElementById('selected-date');
+            const saveEntryBtn = document.getElementById('save-entry');
+            const exportPdfBtn = document.getElementById('export-pdf');
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
+            const moodOptions = document.querySelectorAll('input[name="mood"]');
+            
+            let currentDate = new Date();
+            let selectedDate = new Date();
+            let currentMonth = currentDate.getMonth();
+            let currentYear = currentDate.getFullYear();
+            
+            // Initialize journal entries from localStorage
+            let journalEntries = JSON.parse(localStorage.getItem('journalEntries')) || {};
+            
+            // Generate the calendar for the current month
+            function generateCalendar(month, year) {
+                // Clear the calendar
+                calendarBody.innerHTML = '';
+                
+                // Update the month display
+                const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                monthDisplay.textContent = `${months[month]} ${year}`;
+                
+                // Get the first day of the month
+                const firstDay = new Date(year, month, 1);
+                
+                // Get the last day of the month
+                const lastDay = new Date(year, month + 1, 0);
+                
+                // Get the day of the week of the first day (0-6)
+                const firstDayOfWeek = firstDay.getDay();
+                
+                // Create the calendar rows and cells
+                let date = 1;
+                
+                // Create the calendar rows
+                for (let i = 0; i < 6; i++) {
+                    // Create a table row
+                    const row = document.createElement('tr');
+                    
+                    // Create cells for each day of the week
+                    for (let j = 0; j < 7; j++) {
+                        // Create a table cell
+                        const cell = document.createElement('td');
+                        
+                        // Add the date to the cell if it's a valid date for this month
+                        if (i === 0 && j < firstDayOfWeek) {
+                            // Empty cell
+                            row.appendChild(cell);
+                        } else if (date > lastDay.getDate()) {
+                            // We've gone past the last day of the month
+                            break;
+                        } else {
+                            // Valid date cell
+                            cell.textContent = date;
+                            
+                            // Check if this date has a journal entry
+                            const dateStr = formatDate(new Date(year, month, date));
+                            if (journalEntries[dateStr]) {
+                                cell.classList.add('has-entry');
+                                
+                                // Add mood class
+                                if (journalEntries[dateStr].mood) {
+                                    cell.classList.add(`mood-${journalEntries[dateStr].mood}`);
+                                } else {
+                                    cell.classList.add('mood-neutral'); // Default for legacy entries
+                                }
+                            }
+                            
+                            // Check if this is today
+                            if (date === currentDate.getDate() && month === currentDate.getMonth() && year === currentDate.getFullYear()) {
+                                cell.classList.add('today');
+                            }
+                            
+                            // Check if this is the selected date
+                            if (date === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear()) {
+                                cell.classList.add('selected');
+                            }
+                            
+                            // Add click event to select this date
+                            cell.addEventListener('click', function() {
+                                // Remove the 'selected' class from the previously selected cell
+                                const previouslySelected = document.querySelector('.selected');
+                                if (previouslySelected) {
+                                    previouslySelected.classList.remove('selected');
+                                }
+                                
+                                // Add the 'selected' class to this cell
+                                cell.classList.add('selected');
+                                
+                                // Update the selected date
+                                selectedDate = new Date(year, month, date);
+                                updateSelectedDateDisplay();
+                                loadJournalEntry();
+                            });
+                            
+                            row.appendChild(cell);
+                            date++;
+                        }
+                    }
+                    
+                    // Add the row to the calendar body
+                    calendarBody.appendChild(row);
+                    
+                    // Break if we've gone past the last day of the month
+                    if (date > lastDay.getDate()) {
+                        break;
+                    }
+                }
+            }
+            
+            // Format date as YYYY-MM-DD
+            function formatDate(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            
+            // Format date for display (Month Day, Year)
+            function formatDateForDisplay(date) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return date.toLocaleDateString('en-US', options);
+            }
+            
+            // Update the selected date display
+            function updateSelectedDateDisplay() {
+                selectedDateDisplay.textContent = formatDateForDisplay(selectedDate);
+            }
+            
+            // Load the journal entry for the selected date
+            function loadJournalEntry() {
+                const dateStr = formatDate(selectedDate);
+                
+                // Reset the form
+                quill.root.innerHTML = '';
+                moodOptions.forEach(option => option.checked = false);
+                
+                // Load entry if it exists
+                if (journalEntries[dateStr]) {
+                    // Set content in the editor
+                    if (journalEntries[dateStr].content) {
+                        quill.root.innerHTML = journalEntries[dateStr].content;
+                    } else if (typeof journalEntries[dateStr] === 'string') {
+                        // Handle legacy entries (before mood tracking)
+                        quill.root.innerHTML = journalEntries[dateStr];
+                    }
+                    
+                    // Set mood if it exists
+                    if (journalEntries[dateStr].mood) {
+                        document.getElementById(`mood-${journalEntries[dateStr].mood}`).checked = true;
+                    }
+                }
+            }
+            
+            // Save the journal entry for the selected date
+            function saveJournalEntry() {
+                const dateStr = formatDate(selectedDate);
+                const entryContent = quill.root.innerHTML;
+                
+                // Get the selected mood
+                let selectedMood = null;
+                moodOptions.forEach(option => {
+                    if (option.checked) {
+                        selectedMood = option.value;
+                    }
+                });
+                
+                // If no mood is selected, default to neutral
+                if (!selectedMood && entryContent.trim()) {
+                    selectedMood = 'neutral';
+                }
+                
+                if (entryContent.trim()) {
+                    // Store the entry with mood
+                    journalEntries[dateStr] = {
+                        content: entryContent,
+                        mood: selectedMood
+                    };
+                } else {
+                    // No content, remove the entry
+                    delete journalEntries[dateStr];
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('journalEntries', JSON.stringify(journalEntries));
+                
+                // Update the calendar to show which dates have entries
+                generateCalendar(currentMonth, currentYear);
+                
+                // Show a brief confirmation
+                const saveBtn = document.getElementById('save-entry');
+                const originalText = saveBtn.textContent;
+                saveBtn.textContent = 'Saved!';
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                }, 1500);
+            }
+            
+            // Export the journal entry to PDF
+            function exportToPDF() {
+                const { jsPDF } = window.jspdf;
+                const dateStr = formatDate(selectedDate);
+                
+                if (!journalEntries[dateStr]) {
+                    alert('No entry to export for this date.');
+                    return;
+                }
+                
+                // Prepare content for PDF
+                const pdfContent = document.getElementById('pdf-content');
+                pdfContent.innerHTML = '';
+                pdfContent.style.display = 'block';
+                
+                // Create a styled HTML structure for the PDF
+                pdfContent.innerHTML = `
+                    <div style="font-family: Arial, sans-serif; padding: 40px; max-width: 700px;">
+                        <h1 style="color: #3498db; text-align: center;">Journal Entry</h1>
+                        <h2 style="color: #2c3e50; text-align: center;">${formatDateForDisplay(selectedDate)}</h2>
+                        
+                        <div style="margin: 20px 0; text-align: center;">
+                            <strong>Mood:</strong> 
+                            ${journalEntries[dateStr].mood === 'happy' ? '😊 Happy' : 
+                              journalEntries[dateStr].mood === 'sad' ? '😔 Sad' : '😐 Neutral'}
+                        </div>
+                        
+                        <div style="border-top: 1px solid #ddd; padding-top: 20px;">
+                            ${journalEntries[dateStr].content || journalEntries[dateStr]}
+                        </div>
+                    </div>
+                `;
+                
+                // Generate the PDF from the HTML content
+                html2canvas(pdfContent, {
+                    scale: 2
+                }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const imgWidth = 210; // A4 width in mm
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    
+                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                    pdf.save(`journal-entry-${dateStr}.pdf`);
+                    
+                    // Hide the PDF content div again
+                    pdfContent.style.display = 'none';
+                });
+            }
+            
+            // Initialize the calendar
+            generateCalendar(currentMonth, currentYear);
+            updateSelectedDateDisplay();
+            loadJournalEntry();
+            
+            // Event listeners
+            saveEntryBtn.addEventListener('click', saveJournalEntry);
+            exportPdfBtn.addEventListener('click', exportToPDF);
+            
+            prevMonthBtn.addEventListener('click', function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                generateCalendar(currentMonth, currentYear);
+            });
+            
+            nextMonthBtn.addEventListener('click', function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                generateCalendar(currentMonth, currentYear);
+            });
+        });
+    </script>
+</body>
+</html>
